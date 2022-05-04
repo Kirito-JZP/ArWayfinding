@@ -11,7 +11,14 @@ import androidx.navigation.ui.AppBarConfiguration;
 import androidx.navigation.ui.NavigationUI;
 
 import com.main.arwayfinding.databinding.ActivityMainBinding;
-
+/**
+ * Define the main activity
+ *
+ * @author JIA
+ * @author Last Modified By JIA
+ * @version Revision: 0
+ * Date: 2022/5/5 2:28
+ */
 public class MainActivity extends AppCompatActivity {
 
     private ActivityMainBinding binding;
