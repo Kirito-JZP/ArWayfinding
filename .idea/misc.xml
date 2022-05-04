@@ -1,0 +1,39 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project version="4">
+  <component name="DesignSurface">
+    <option name="filePathToZoomLevelMap">
+      <map>
+        <entry key="..\:/Users/jia72/AndroidStudioProjects/ArWayfinding/app/src/main/res/drawable/bg_account.xml" value="0.15555555555555556" />
+        <entry key="..\:/Users/jia72/AndroidStudioProjects/ArWayfinding/app/src/main/res/drawable/bg_bottom_sheet.xml" value="0.14537037037037037" />
+        <entry key="..\:/Users/jia72/AndroidStudioProjects/ArWayfinding/app/src/main/res/drawable/bg_white.xml" value="0.21666666666666667" />
+        <entry key="..\:/Users/jia72/AndroidStudioProjects/ArWayfinding/app/src/main/res/drawable/ic_account.xml" value="0.14537037037037037" />
+        <entry key="..\:/Users/jia72/AndroidStudioProjects/ArWayfinding/app/src/main/res/drawable/ic_add.xml" value="0.21666666666666667" />
+        <entry key="..\:/Users/jia72/AndroidStudioProjects/ArWayfinding/app/src/main/res/drawable/ic_ar_camera.xml" value="0.21666666666666667" />
+        <entry key="..\:/Users/jia72/AndroidStudioProjects/ArWayfinding/app/src/main/res/drawable/ic_ar_exit.xml" value="0.15555555555555556" />
+        <entry key="..\:/Users/jia72/AndroidStudioProjects/ArWayfinding/app/src/main/res/drawable/ic_avatar.xml" value="0.15555555555555556" />
+        <entry key="..\:/Users/jia72/AndroidStudioProjects/ArWayfinding/app/src/main/res/drawable/ic_baseline_clear_24.xml" value="0.21666666666666667" />
+        <entry key="..\:/Users/jia72/AndroidStudioProjects/ArWayfinding/app/src/main/res/drawable/ic_clear.xml" value="0.21666666666666667" />
+        <entry key="..\:/Users/jia72/AndroidStudioProjects/ArWayfinding/app/src/main/res/drawable/ic_country.xml" value="0.15555555555555556" />
+        <entry key="..\:/Users/jia72/AndroidStudioProjects/ArWayfinding/app/src/main/res/drawable/ic_departure.xml" value="0.14537037037037037" />
+        <entry key="..\:/Users/jia72/AndroidStudioProjects/ArWayfinding/app/src/main/res/drawable/ic_exchange.xml" value="0.21666666666666667" />
+        <entry key="..\:/Users/jia72/AndroidStudioProjects/ArWayfinding/app/src/main/res/drawable/ic_loc_img.xml" value="0.14537037037037037" />
+        <entry key="..\:/Users/jia72/AndroidStudioProjects/ArWayfinding/app/src/main/res/drawable/ic_phone.xml" value="0.15555555555555556" />
+        <entry key="..\:/Users/jia72/AndroidStudioProjects/ArWayfinding/app/src/main/res/drawable/ic_remove.xml" value="0.14537037037037037" />
+        <entry key="..\:/Users/jia72/AndroidStudioProjects/ArWayfinding/app/src/main/res/drawable/ic_search.xml" value="0.21666666666666667" />
+        <entry key="..\:/Users/jia72/AndroidStudioProjects/ArWayfinding/app/src/main/res/layout/activity_ar.xml" value="0.20520833333333333" />
+        <entry key="..\:/Users/jia72/AndroidStudioProjects/ArWayfinding/app/src/main/res/layout/activity_arnavigation.xml" value="0.20520833333333333" />
+        <entry key="..\:/Users/jia72/AndroidStudioProjects/ArWayfinding/app/src/main/res/layout/activity_main.xml" value="0.2957427536231884" />
+        <entry key="..\:/Users/jia72/AndroidStudioProjects/ArWayfinding/app/src/main/res/layout/fragment_account.xml" value="0.20520833333333333" />
+        <entry key="..\:/Users/jia72/AndroidStudioProjects/ArWayfinding/app/src/main/res/layout/fragment_map.xml" value="0.2957427536231884" />
+        <entry key="..\:/Users/jia72/AndroidStudioProjects/ArWayfinding/app/src/main/res/layout/fragment_preference.xml" value="0.20520833333333333" />
+        <entry key="..\:/Users/jia72/AndroidStudioProjects/ArWayfinding/app/src/main/res/menu/bottom_nav_menu.xml" value="0.20520833333333333" />
+      </map>
+    </option>
+  </component>
+  <component name="ProjectRootManager" version="2" languageLevel="JDK_11" default="true" project-jdk-name="Android Studio default JDK" project-jdk-type="JavaSDK">
+    <output url="file://$PROJECT_DIR$/build/classes" />
+  </component>
+  <component name="ProjectType">
+    <option name="id" value="Android" />
+  </component>
+</project>

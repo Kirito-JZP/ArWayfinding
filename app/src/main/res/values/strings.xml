@@ -1,0 +1,33 @@
+<resources>
+    <string name="app_name">ArWayfinding</string>
+    <string name="title_activity_ar">ArActivity</string>
+    <string name="title_map">Map</string>
+    <string name="title_preference">Preference</string>
+    <string name="title_account">Account</string>
+    <!-- Map -->
+    <string name="your_location">Your location</string>
+    <string name="input_search">Search here</string>
+    <string name="trans_public">Public</string>
+    <string name="trans_walk">Walk</string>
+    <string name="trans_cycling">Cycling</string>
+    <string name="set_destination">Set destination</string>
+    <string name="set_departure">Set departure</string>
+    <!-- Preference -->
+    <string name="recent_save">Recently Saved</string>
+    <string name="nearby_save">Nearby Saved</string>
+    <!-- Account -->
+    <string name="email">Email</string>
+    <string name="password">Password</string>
+    <string name="login">Login</string>
+    <string name="sign_up">Sign Up</string>
+    <string name="sign_out">Sign Out</string>
+    <string name="country">Country</string>
+    <string name="username">UserName</string>
+    <string name="surname">Surname</string>
+    <string name="first_name">First Name</string>
+    <string name="phone_number">Phone NO.</string>
+    <string name="confirm">Confirm</string>
+    <string name="edit">Edit</string>
+    <string name="back">Back</string>
+    <string name="copy_right">Copyright© 2022 Group3 AVR TCD</string>
+</resources>

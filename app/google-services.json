@@ -1,0 +1,40 @@
+{
+  "project_info": {
+    "project_number": "594484774595",
+    "firebase_url": "https://wayfinding-55555-default-rtdb.europe-west1.firebasedatabase.app",
+    "project_id": "wayfinding-55555",
+    "storage_bucket": "wayfinding-55555.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:594484774595:android:fac890f4b0cac517d48476",
+        "android_client_info": {
+          "package_name": "com.main.arwayfinding"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "594484774595-preq3e0popjchrp5ggq965fkkfvknamf.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyAcJCfm-anV0e9Lcappc8_oHyeUV_w9zMQ"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "594484774595-preq3e0popjchrp5ggq965fkkfvknamf.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

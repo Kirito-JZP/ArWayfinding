@@ -1,0 +1,43 @@
+<?xml version="1.0" encoding="utf-8"?>
+<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    tools:context=".ArActivity">
+
+    <!-- The primary full-screen view. This can be replaced with whatever view
+       is needed to present your content, e.g. VideoView, SurfaceView,
+       TextureView, etc. -->
+    <fragment android:name="com.google.ar.sceneform.ux.ArFragment"
+        android:id="@+id/ar_fragment"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent" />
+
+    <!-- This FrameLayout insets its children based on system windows using
+         android:fitsSystemWindows. -->
+    <FrameLayout
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:fitsSystemWindows="true">
+
+        <LinearLayout
+            android:id="@+id/fullscreen_content_controls"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_gravity="bottom|center_horizontal"
+            android:orientation="horizontal"
+            tools:ignore="UselessParent">
+
+            <ImageView
+                android:id="@+id/arReturnBtn"
+                android:layout_width="35dp"
+                android:layout_height="35dp"
+                android:layout_marginLeft="340dp"
+                android:layout_marginBottom="20dp"
+                android:scaleType="centerCrop"
+                android:elevation="5dp"
+                android:src="@drawable/ic_ar_exit" />
+        </LinearLayout>
+    </FrameLayout>
+
+</FrameLayout>
