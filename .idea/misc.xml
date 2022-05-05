@@ -3,6 +3,9 @@
   <component name="DesignSurface">
     <option name="filePathToZoomLevelMap">
       <map>
+        <entry key="..\:/Users/jia72/AndroidStudioProjects/ArWayfinding/app/src/main/res/drawable-v24/bg_protocol.xml" value="0.1" />
+        <entry key="..\:/Users/jia72/AndroidStudioProjects/ArWayfinding/app/src/main/res/drawable-v24/ic_email_blue.xml" value="0.1" />
+        <entry key="..\:/Users/jia72/AndroidStudioProjects/ArWayfinding/app/src/main/res/drawable-v24/ic_lock.xml" value="0.1" />
         <entry key="..\:/Users/jia72/AndroidStudioProjects/ArWayfinding/app/src/main/res/drawable/bg_account.xml" value="0.15555555555555556" />
         <entry key="..\:/Users/jia72/AndroidStudioProjects/ArWayfinding/app/src/main/res/drawable/bg_bottom_sheet.xml" value="0.14537037037037037" />
         <entry key="..\:/Users/jia72/AndroidStudioProjects/ArWayfinding/app/src/main/res/drawable/bg_white.xml" value="0.21666666666666667" />
@@ -23,7 +26,11 @@
         <entry key="..\:/Users/jia72/AndroidStudioProjects/ArWayfinding/app/src/main/res/layout/activity_ar.xml" value="0.20520833333333333" />
         <entry key="..\:/Users/jia72/AndroidStudioProjects/ArWayfinding/app/src/main/res/layout/activity_arnavigation.xml" value="0.20520833333333333" />
         <entry key="..\:/Users/jia72/AndroidStudioProjects/ArWayfinding/app/src/main/res/layout/activity_main.xml" value="0.2957427536231884" />
+        <entry key="..\:/Users/jia72/AndroidStudioProjects/ArWayfinding/app/src/main/res/layout/dialog_protocol.xml" value="0.11639492753623189" />
         <entry key="..\:/Users/jia72/AndroidStudioProjects/ArWayfinding/app/src/main/res/layout/fragment_account.xml" value="0.20520833333333333" />
+        <entry key="..\:/Users/jia72/AndroidStudioProjects/ArWayfinding/app/src/main/res/layout/fragment_account_avatar.xml" value="0.11639492753623189" />
+        <entry key="..\:/Users/jia72/AndroidStudioProjects/ArWayfinding/app/src/main/res/layout/fragment_account_create.xml" value="0.32155797101449274" />
+        <entry key="..\:/Users/jia72/AndroidStudioProjects/ArWayfinding/app/src/main/res/layout/fragment_account_login.xml" value="0.11639492753623189" />
         <entry key="..\:/Users/jia72/AndroidStudioProjects/ArWayfinding/app/src/main/res/layout/fragment_map.xml" value="0.2957427536231884" />
         <entry key="..\:/Users/jia72/AndroidStudioProjects/ArWayfinding/app/src/main/res/layout/fragment_preference.xml" value="0.20520833333333333" />
         <entry key="..\:/Users/jia72/AndroidStudioProjects/ArWayfinding/app/src/main/res/menu/bottom_nav_menu.xml" value="0.20520833333333333" />

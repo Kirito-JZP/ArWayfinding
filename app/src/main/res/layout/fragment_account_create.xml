@@ -1,0 +1,163 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    >
+
+    <androidx.coordinatorlayout.widget.CoordinatorLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content">
+
+
+        <ScrollView
+            android:layout_width="match_parent"
+            android:layout_height="530dp"
+            android:scrollbars="none">
+
+
+            <LinearLayout
+                android:layout_width="300dp"
+                android:layout_height="wrap_content"
+                android:layout_gravity="center_horizontal"
+                android:layout_marginBottom="50dp"
+                android:orientation="vertical">
+
+                <ImageView
+                    android:id="@+id/avatar_signup"
+                    android:layout_width="match_parent"
+                    android:layout_height="89dp"
+                    android:layout_centerHorizontal="true"
+                    android:layout_marginTop="50dp"
+                    android:src="@drawable/ic_avatar_blue" />
+
+                <EditText
+                    android:id="@+id/email_signup"
+                    android:layout_width="match_parent"
+                    android:layout_height="30dp"
+                    android:layout_marginTop="20dp"
+                    android:background="@drawable/bg_account"
+                    android:gravity="center_horizontal"
+                    android:textSize="20sp"
+                    android:hint="@string/email"
+                    android:inputType="textEmailAddress"
+                    android:minHeight="70dp" />
+
+                <EditText
+                    android:id="@+id/password_signup"
+                    android:layout_width="match_parent"
+                    android:layout_height="30dp"
+                    android:layout_marginTop="20dp"
+                    android:background="@drawable/bg_account"
+                    android:gravity="center_horizontal"
+                    android:textSize="20sp"
+                    android:hint="@string/password"
+                    android:inputType="textPassword"
+                    android:minHeight="70dp" />
+
+                <EditText
+                    android:id="@+id/first_name_signup"
+                    android:layout_width="match_parent"
+                    android:layout_height="30dp"
+                    android:layout_marginTop="20dp"
+                    android:background="@drawable/bg_account"
+                    android:gravity="center_horizontal"
+                    android:textSize="20sp"
+                    android:hint="@string/first_name"
+                    />
+
+                <EditText
+                    android:id="@+id/surname_signup"
+                    android:layout_width="match_parent"
+                    android:layout_height="30dp"
+                    android:layout_marginTop="20dp"
+                    android:background="@drawable/bg_account"
+                    android:gravity="center_horizontal"
+                    android:textSize="20sp"
+                    android:hint="@string/surname"
+                    android:inputType="textPersonName"
+                    />
+
+                <EditText
+                    android:id="@+id/country_signup"
+                    android:layout_width="match_parent"
+                    android:layout_height="30dp"
+                    android:layout_marginTop="20dp"
+                    android:background="@drawable/bg_account"
+                    android:gravity="center_horizontal"
+                    android:textSize="20sp"
+                    android:hint="@string/country"
+                    android:minHeight="70dp" />
+
+                <EditText
+                    android:id="@+id/phone_no_signup"
+                    android:layout_width="match_parent"
+                    android:layout_height="30dp"
+                    android:layout_marginTop="20dp"
+                    android:background="@drawable/bg_account"
+                    android:gravity="center_horizontal"
+                    android:textSize="20sp"
+                    android:hint="@string/phone_number"
+                    android:inputType="phone"
+                    android:minHeight="70dp" />
+
+
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="30dp"
+                    android:orientation="horizontal"
+                    android:gravity="center"
+                    android:layout_marginTop="15dp"
+                    >
+
+                    <CheckBox
+                        android:id="@+id/checkBox"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        />
+
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="Agree with "
+                        android:textSize="14sp"
+                        />
+                    <TextView
+                        android:id="@+id/protocol"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="Term and Conditions"
+                        android:textSize="14sp"
+                        android:textColor="#1a73e8"
+                        />
+
+                </LinearLayout>
+
+                <Button
+                    android:layout_marginTop="20dp"
+                    android:id="@+id/create_account"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:text="Create account"
+                    android:textColor="#FFFFFF" />
+                <Button
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent"
+                    android:paddingBottom="100dp"
+                    android:alpha="0">
+                </Button>
+
+            </LinearLayout>
+        </ScrollView>
+
+
+    </androidx.coordinatorlayout.widget.CoordinatorLayout>
+
+
+
+
+
+
+</RelativeLayout>

@@ -86,7 +86,7 @@ public class MapFragment extends Fragment implements OnMapReadyCallback {
     public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
 
-        bindComponent(view);
+        bindMapComponent(view);
 
         arBtn.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -117,7 +117,7 @@ public class MapFragment extends Fragment implements OnMapReadyCallback {
      *
      * @param view
      */
-    private void bindComponent(View view) {
+    private void bindMapComponent(View view) {
         // ImageView
         addBtn = view.findViewById(R.id.add_btn);
         exchangeBtn = view.findViewById(R.id.exchange_btn);

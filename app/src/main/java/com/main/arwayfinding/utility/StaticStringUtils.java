@@ -1,10 +1,18 @@
 package com.main.arwayfinding.utility;
 
-
+/**
+ * Define the static strings
+ *
+ * @author JIA
+ * @author Last Modified By JIA
+ * @version Revision: 0
+ * Date: 2022/5/4 20:58
+ */
 public class StaticStringUtils {
     public static final String NULL_STRING = "";
     public static final String PRIVACY_TITLE = "Privacy Protocol";
     public static final String PRIVACY_TXT = "privacy.txt";
+    public static final String FIREBASE_INSTANCE = "https://wayfinding-55555-default-rtdb.europe-west1.firebasedatabase.app/";
     // Dialog Message
     public static final String TERMS_AGREE_MSG = "Please agree with terms";
     public static final String INCORRECT_EMAIL_FORMAT = "Incorrect Email Format!\n";
