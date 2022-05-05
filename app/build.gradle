@@ -9,7 +9,7 @@ android {
 
     defaultConfig {
         applicationId "com.main.arwayfinding"
-        minSdk 21
+        minSdk 26
         targetSdk 32
         versionCode 1
         versionName "1.0"
@@ -30,6 +30,16 @@ android {
     buildFeatures {
         viewBinding true
     }
+
+    apply plugin: 'com.google.ar.sceneform.plugin'
+    sceneform.asset('sampledata/arrow.obj',
+            'default',
+            'sampledata/models/arrow.sfa',
+            'src/main/res/raw/arrow')
+    sceneform.asset('sampledata/andy.obj',
+            'default',
+            'sampledata/models/andy.sfa',
+            'src/main/res/raw/andy')
 }
 
 dependencies {
