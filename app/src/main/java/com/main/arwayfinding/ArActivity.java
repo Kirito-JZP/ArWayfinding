@@ -4,8 +4,6 @@ import android.content.Context;
 import android.content.Intent;
 import android.location.Location;
 import android.os.Bundle;
-import android.view.Gravity;
-import android.view.MotionEvent;
 import android.view.View;
 import android.view.WindowManager;
 import android.widget.ImageView;
@@ -16,23 +14,16 @@ import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
 
 import com.google.android.material.snackbar.Snackbar;
-import com.google.ar.core.Anchor;
 import com.google.ar.core.Frame;
-import com.google.ar.core.HitResult;
 import com.google.ar.core.Plane;
-import com.google.ar.core.Pose;
 import com.google.ar.core.Session;
 import com.google.ar.core.TrackingState;
 import com.google.ar.core.exceptions.CameraNotAvailableException;
 import com.google.ar.core.exceptions.UnavailableException;
-import com.google.ar.sceneform.AnchorNode;
 import com.google.ar.sceneform.ArSceneView;
 import com.google.ar.sceneform.Node;
 import com.google.ar.sceneform.rendering.ModelRenderable;
 import com.google.ar.sceneform.rendering.ViewRenderable;
-import com.google.ar.sceneform.ux.ArFragment;
-import com.google.ar.sceneform.ux.BaseArFragment;
-import com.google.ar.sceneform.ux.TransformableNode;
 import com.main.arwayfinding.databinding.ActivityArBinding;
 import com.main.arwayfinding.dto.LocationDto;
 import com.main.arwayfinding.logic.GPSTrackerLogic;
@@ -125,114 +116,37 @@ public class ArActivity extends AppCompatActivity {
                             }
 
                             if (locationScene == null) {
-                                // If our locationScene object hasn't been setup yet, this is a
-                                // good time to do it
+                                // If our locationScene object hasn't been setup yet, this is a good time to do it
                                 // We know that here, the AR components have been initiated.
                                 locationScene = new LocationScene(this, this, arSceneView);
-                                ArActivity thisActivity = this;
-                                locationScene.setLocationChangedEvent(new DeviceLocationChanged() {
+
+                                // Now lets create our location markers.
+                                // First, a layout
+                                LocationMarker layoutLocationMarker = new LocationMarker(
+                                        121.44389121570103,
+                                        31.27287039094972,
+                                        createViewNode()
+                                );
+
+                                // An example "onRender" event, called every frame
+                                // Updates the layout with the markers distance
+                                layoutLocationMarker.setRenderEvent(new LocationNodeRender() {
                                     @Override
-                                    public void onChange(Location ArLocation) {
-                                        GPSTrackerLogic trackerLogic =
-                                                new GPSTrackerLogic(thisActivity);
-                                        Location location = trackerLogic.getLocation(thisActivity);
-                                        locationScene.deviceLocation.currentBestLocation.setLatitude(location.getLatitude());
-                                        locationScene.deviceLocation.currentBestLocation.setLongitude(location.getLongitude());
-                                        if (lastPosition == null) {
-                                            lastPosition = location;
-                                            list = PlaceUtils.getNearby(location);
-                                            needUpdate = true;
-                                        }
-                                        if (needUpdate) {
-                                            for (LocationDto locationDto : list) {
-                                                //------------------------
-                                                CompletableFuture<ViewRenderable> layout =
-                                                        ViewRenderable.builder()
-                                                                .setView(thisActivity,
-                                                                        R.layout.activity_ar_label)
-                                                                .build();
-
-                                                CompletableFuture<ModelRenderable> model =
-                                                        ModelRenderable.builder()
-                                                        .setSource(thisActivity, R.raw.andy)
-                                                        .build();
-                                                CompletableFuture.allOf(layout, model).handle(
-                                                        (notUsed, throwable) -> {
-                                                            // When you build a Renderable,
-                                                            // Sceneform loads its resources in
-                                                            // the background while
-                                                            // returning a CompletableFuture.
-                                                            // Call handle(), thenAccept(), or
-                                                            // check isDone()
-                                                            // before calling get().
-
-                                                            if (throwable != null) {
-                                                                ArLocationUtils.displayError(thisActivity, "Unable to load renderables", throwable);
-                                                                return null;
-                                                            }
-                                                            try {
-                                                                layoutRenderable = layout.get();
-                                                                modelRenderable = model.get();
-                                                                hasFinishedLoading = true;
-                                                            } catch (InterruptedException | ExecutionException ex) {
-                                                                ArLocationUtils.displayError(thisActivity, "Unable to load renderables", ex);
-                                                            }
-                                                            //-----------------------------
-                                                            // Now lets create our location markers.
-                                                            // First, a layout
-
-                                                            LocationMarker layoutLocationMarker =
-                                                                    new LocationMarker(
-                                                                    locationDto.getLongitude(),
-                                                                    locationDto.getLatitude(),
-                                                                    createViewNode()
-                                                            );
-
-                                                            // Updates the layout with the
-                                                            // markers distance
-                                                            ViewRenderable copyOfRenderable =
-                                                                    layoutRenderable.makeCopy();
-                                                            String name = locationDto.getName();
-                                                            layoutLocationMarker.setRenderEvent(new LocationNodeRender() {
-                                                                @Override
-                                                                public void render(LocationNode node) {
-                                                                    View eView =
-                                                                            copyOfRenderable.getView();
-                                                                    TextView distanceTextView =
-                                                                            eView.findViewById(R.id.loc_distance);
-                                                                    TextView nameTextView =
-                                                                            eView.findViewById(R.id.loc_name);
-                                                                    nameTextView.setText(name);
-                                                                    distanceTextView.setText(node.getDistance() + "M");
-
-                                                                }
-                                                            });
-                                                            // Adding the marker
-                                                            locationScene.mLocationMarkers.add(layoutLocationMarker);
-
-                                                            // Adding a simple location marker of
-                                                            // a 3D model
-                                                            locationScene.mLocationMarkers.add(
-                                                                    new LocationMarker(
-                                                                            locationDto.getLongitude(),
-                                                                            locationDto.getLatitude(),
-                                                                            createModelNode()));
-                                                            return null;
-                                                        });
-                                                //-------------------------
-                                            }
-                                            needUpdate = false;
-                                        }
-                                        if (location.distanceTo(lastPosition) >= 15) {
-                                            lastPosition = location;
-                                            list = PlaceUtils.getNearby(location);
-                                            locationScene.clearMarkers();
-                                            needUpdate = true;
-                                        }
+                                    public void render(LocationNode node) {
+                                        View eView = layoutRenderable.getView();
+                                        TextView distanceTextView = eView.findViewById(R.id.loc_distance);
+                                        distanceTextView.setText(node.getDistance() + "M");
                                     }
-
-
                                 });
+                                // Adding the marker
+                                locationScene.mLocationMarkers.add(layoutLocationMarker);
+
+                                // Adding a simple location marker of a 3D model
+                                locationScene.mLocationMarkers.add(
+                                        new LocationMarker(
+                                                121.44511075546684,
+                                                31.273142774057952,
+                                                createModelNode()));
                             }
 
                             Frame frame = arSceneView.getArFrame();
