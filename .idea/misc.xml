@@ -3,6 +3,8 @@
   <component name="DesignSurface">
     <option name="filePathToZoomLevelMap">
       <map>
+        <entry key="..\:/ArWayfinding/app/src/main/res/layout/activity_ar.xml" value="0.21666666666666667" />
+        <entry key="..\:/ArWayfinding/app/src/main/res/layout/ar_arrow.xml" value="0.21666666666666667" />
         <entry key="..\:/Users/jia72/AndroidStudioProjects/ArWayfinding/app/src/main/res/drawable-v24/bg_protocol.xml" value="0.1" />
         <entry key="..\:/Users/jia72/AndroidStudioProjects/ArWayfinding/app/src/main/res/drawable-v24/ic_email_blue.xml" value="0.1" />
         <entry key="..\:/Users/jia72/AndroidStudioProjects/ArWayfinding/app/src/main/res/drawable-v24/ic_lock.xml" value="0.1" />

@@ -14,12 +14,15 @@ import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
 
 import com.google.android.material.snackbar.Snackbar;
+import com.google.ar.core.Anchor;
 import com.google.ar.core.Frame;
 import com.google.ar.core.Plane;
+import com.google.ar.core.Pose;
 import com.google.ar.core.Session;
 import com.google.ar.core.TrackingState;
 import com.google.ar.core.exceptions.CameraNotAvailableException;
 import com.google.ar.core.exceptions.UnavailableException;
+import com.google.ar.sceneform.AnchorNode;
 import com.google.ar.sceneform.ArSceneView;
 import com.google.ar.sceneform.Node;
 import com.google.ar.sceneform.math.Vector3;
@@ -64,6 +67,7 @@ public class ArActivity extends AppCompatActivity {
     private Location lastPosition;
     private boolean needUpdate;
     private ImageView arReturnBtn;
+    private static boolean placed = false;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -158,12 +162,28 @@ public class ArActivity extends AppCompatActivity {
                             }
 
                             Frame frame = arSceneView.getArFrame();
+                            //test
+
                             if (frame == null) {
                                 return;
                             }
 
                             if (frame.getCamera().getTrackingState() != TrackingState.TRACKING) {
                                 return;
+                            }
+                            if(frame.getCamera().getTrackingState()==TrackingState.TRACKING && !placed) {
+                                Pose pos = frame.getCamera().getPose().compose(Pose.makeTranslation(0, 0f, -0.3f));
+                                Anchor anchor = arSceneView.getSession().createAnchor(pos);
+                                AnchorNode anchorNode = new AnchorNode(anchor);
+                                anchorNode.setParent(arSceneView.getScene());
+
+                                // Create the arrow node and add it to the anchor.
+                                Node arrow = new Node();
+                                arrow.setLocalPosition((new Vector3(0.1f,0.1f, -1.0f)));
+                                arSceneView.getScene().getCamera().addChild(arrow);
+                                //arrow.setParent(anchorNode);
+                                arrow.setRenderable(modelRenderable);
+                                placed = true; //to place the arrow just once.
                             }
 
                             if (locationScene != null) {
