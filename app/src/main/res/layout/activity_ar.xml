@@ -36,9 +36,29 @@
                 android:scaleType="centerCrop"
                 android:elevation="5dp"
                 android:src="@drawable/ic_ar_exit" />
+
+
         </LinearLayout>
 
-<!--        <com.google.android.material.floatingactionbutton.FloatingActionButton-->
+        <SeekBar
+            android:id="@+id/seekBar"
+            android:layout_width="match_parent"
+            android:layout_height="280dp"
+            android:layout_weight="1"
+            android:max="360"
+            android:min="0"
+            android:progress="0" />
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:id="@+id/seekBarText"
+            android:layout_marginLeft="20dp"
+            android:layout_marginTop="20dp"
+            android:text=""
+            android:textSize="20sp" />
+
+
+        <!--        <com.google.android.material.floatingactionbutton.FloatingActionButton-->
 <!--            android:id="@+id/ar_arrow_center"-->
 <!--            android:layout_width="173dp"-->
 <!--            android:layout_height="wrap_content"-->
@@ -47,6 +67,7 @@
 <!--            android:layout_margin="5dp"-->
 <!--            android:src="@drawable/ic_avatar_blue"-->
 <!--            android:visibility="visible" />-->
+
     </FrameLayout>
 
 </FrameLayout>

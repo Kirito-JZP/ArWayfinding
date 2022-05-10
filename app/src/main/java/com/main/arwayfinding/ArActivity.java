@@ -7,12 +7,14 @@ import android.os.Bundle;
 import android.view.View;
 import android.view.WindowManager;
 import android.widget.ImageView;
+import android.widget.SeekBar;
 import android.widget.TextView;
 import android.widget.Toast;
 import android.hardware.Sensor;
 import android.hardware.SensorEvent;
 import android.hardware.SensorEventListener;
 import android.hardware.SensorManager;
+
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
 
@@ -58,6 +60,9 @@ import uk.co.appoly.arcorelocation.utils.ARLocationPermissionHelper;
  * Date: 2022/5/5 2:28
  */
 public class ArActivity extends AppCompatActivity {
+
+    private SeekBar seekbar;
+    private TextView textView;
     private boolean installRequested;
     private boolean hasFinishedLoading = false;
     private Snackbar loadingMessageSnackbar = null;
@@ -73,8 +78,10 @@ public class ArActivity extends AppCompatActivity {
     private static float[] rotateDegree = new float[3];
     //sensor
     private SensorManager sensorManager;
-    private Sensor orientationSenser;
-    private SensorEventListener orientationEventListener;
+    private Sensor magSensor;
+    private Sensor accSensor;
+    private Sensor oriSensor;
+    private SensorEventListener sensorListener;
     private static final float NS2S = 1.0f / 1000000000.0f;
     private float timestamp;
 
@@ -85,33 +92,103 @@ public class ArActivity extends AppCompatActivity {
         setContentView(binding.getRoot());
         arSceneView = findViewById(R.id.ar_scene_view);
         arReturnBtn = findViewById(R.id.arReturnBtn);
+        seekbar = findViewById(R.id.seekBar);
+        textView = findViewById(R.id.seekBarText);
         //sensor
         sensorManager = (SensorManager) getSystemService(SENSOR_SERVICE);
-        orientationSenser = sensorManager.getDefaultSensor(Sensor.TYPE_ORIENTATION);
+        magSensor = sensorManager.getDefaultSensor(Sensor.TYPE_MAGNETIC_FIELD);
+        accSensor = sensorManager.getDefaultSensor(Sensor.TYPE_ACCELEROMETER);
+        oriSensor = sensorManager.getDefaultSensor(Sensor.TYPE_ORIENTATION);
+//        orientationSenser = sensorManager.getDefaultSensor(Sensor.TYPE_ORIENTATION);
+//        orientationSenser = sensorManager.getDefaultSensor(Sensor.TYPE_MAGNETIC_FIELD);
 
-        if (orientationSenser == null){
+//        if (orientationSenser == null){
+//            Toast.makeText(this, "The device has no orientation sensor!", Toast.LENGTH_SHORT)
+//            .show();
+//            finish();
+//        }
+
+        if (magSensor == null || accSensor == null || oriSensor == null) {
             Toast.makeText(this, "The device has no orientation sensor!", Toast.LENGTH_SHORT).show();
             finish();
         }
-        orientationEventListener = new SensorEventListener() {
+
+        sensorListener = new SensorEventListener() {
+            public float[] accVals = new float[3];
+            public float[] magVals = new float[3];
+            public float[] oriVals = new float[3];
+
             @Override
             public void onSensorChanged(SensorEvent sensorEvent) {
-                System.out.println("方位角：" + (float) (Math.round(sensorEvent.values[0] * 100)) / 100);
-                System.out.println("倾斜角：" + (float) (Math.round(sensorEvent.values[1] * 100)) / 100);
-                System.out.println("滚动角：" + (float) (Math.round(sensorEvent.values[2] * 100)) / 100);
-                rotateDegree[0] = (float) (Math.round(sensorEvent.values[0] * 100)) / 100;
-                rotateDegree[1] = (float) (Math.round(sensorEvent.values[1] * 100)) / 100;
-                rotateDegree[2] = (float) (Math.round(sensorEvent.values[2] * 100)) / 100;
+                // calculate the compass rotation
+                if (sensorEvent.sensor.getType() == Sensor.TYPE_MAGNETIC_FIELD) {
+                    magVals = sensorEvent.values;
+                } else if (sensorEvent.sensor.getType() == Sensor.TYPE_ACCELEROMETER) {
+                    accVals = sensorEvent.values;
+                } else if (sensorEvent.sensor.getType() == Sensor.TYPE_ORIENTATION) {
+                    oriVals = sensorEvent.values;
+                    System.out.println("oriVals: " + oriVals[0] + " " + oriVals[1] + " " + oriVals[2]);
+                }
+
+                if (magVals != null && accVals != null && oriVals != null) {
+                    float[] R = new float[9];
+                    float[] I = new float[9];
+                    boolean success = SensorManager.getRotationMatrix(R, I, accVals, magVals);
+                    if (success) {
+                        float[] orientation = new float[3];
+                        SensorManager.getOrientation(R, orientation);
+                        float azimuthInRadians = orientation[0];
+                        float azimuthInDegress = (float) (Math.toDegrees(azimuthInRadians) + 360) % 360;
+
+                        rotateDegree[0] = oriVals[1];
+                        rotateDegree[1] = 0;
+//                        rotateDegree[2] =   seekbar.getProgress();
+                        rotateDegree[2] =   azimuthInDegress;
+//                        textView.setText(seekbar.getProgress() + "");
+                        textView.setText(azimuthInDegress + "");
+//                        textView.setText("hello???");
+                        System.out.println("rotateDegree: " + rotateDegree[0] + " " + rotateDegree[1] + " " + rotateDegree[2]);
+                    }
+                }
+//                if (sensorEvent.sensor.getType() == Sensor.TYPE_ACCELEROMETER) {
+//                    accVals = sensorEvent.values.clone();
+//                } else if (sensorEvent.sensor.getType() == Sensor.TYPE_MAGNETIC_FIELD) {
+//                    magVals = sensorEvent.values.clone();
+//                }
+//
+//                float[] R = new float[9];
+//                float[] values = new float[3];
+//
+//                sensorManager.getRotationMatrix(R, null, accVals, magVals);
+//                sensorManager.getOrientation(R, values);
+//
+//                System.out.println("rotation: " + Math.toDegrees(values[0]));
+//                rotateDegree[2] = (float) Math.toDegrees(values[0]);
+//                System.out.println("方位角：" + (float) (Math.round(sensorEvent.values[0] * 100)) /
+//                100);
+//                System.out.println("倾斜角：" + (float) (Math.round(sensorEvent.values[1] * 100)) /
+//                100);
+//                System.out.println("滚动角：" + (float) (Math.round(sensorEvent.values[2] * 100)) /
+//                100);
+//                System.out.printf("%0.2f, %0.2f, %0.2f\r", sensorEvent.values[0],sensorEvent
+//                .values[2],sensorEvent.values[2]);
+//                //rotateDegree[0] = (float) (Math.round(sensorEvent.values[0] * 100)) / 100;
+//                rotateDegree[1] = (float) (Math.round(sensorEvent.values[1] * 100)) / 100;
+//                rotateDegree[2] = (float) (Math.round(sensorEvent.values[2] * 100)) / 100;
             }
+
             @Override
             public void onAccuracyChanged(Sensor sensor, int i) {
 
             }
         };
-        CompletableFuture<ViewRenderable> layout = ViewRenderable.builder().setView(this, R.layout.activity_ar_label).build();
+        CompletableFuture<ViewRenderable> layout = ViewRenderable.builder().setView(this,
+                R.layout.activity_ar_label).build();
 
-        CompletableFuture<ModelRenderable> andyModel = andyRenderable.builder().setSource(this, R.raw.andy).build();
-        CompletableFuture<ModelRenderable> arrowModel = andyRenderable.builder().setSource(this, R.raw.arrow).build();
+        CompletableFuture<ModelRenderable> andyModel = andyRenderable.builder().setSource(this,
+                R.raw.andy).build();
+        CompletableFuture<ModelRenderable> arrowModel = andyRenderable.builder().setSource(this,
+                R.raw.arrow).build();
 
         CompletableFuture.allOf(layout, andyModel).handle((notUsed, throwable) -> {
             // When build a Renderable, Sceneform loads its resources in the
@@ -143,7 +220,8 @@ public class ArActivity extends AppCompatActivity {
                                 return;
                             }
                             if (locationScene == null) {
-                                // If our locationScene object hasn't been setup yet, this is a good time to do it
+                                // If our locationScene object hasn't been setup yet, this is a
+                                // good time to do it
                                 // We know that here, the AR components have been initiated.
                                 locationScene = new LocationScene(this, this, arSceneView);
                                 ArActivity thisActivity = this;
@@ -165,7 +243,8 @@ public class ArActivity extends AppCompatActivity {
                                     @Override
                                     public void render(LocationNode node) {
                                         View eView = layoutRenderable.getView();
-                                        TextView distanceTextView = eView.findViewById(R.id.loc_distance);
+                                        TextView distanceTextView =
+                                                eView.findViewById(R.id.loc_distance);
                                         TextView nameTextView = eView.findViewById(R.id.loc_name);
                                         nameTextView.setText(name);
                                         distanceTextView.setText(node.getDistance() + "M");
@@ -180,7 +259,8 @@ public class ArActivity extends AppCompatActivity {
                                     @Override
                                     public void render(LocationNode node) {
                                         Objects.requireNonNull(node.getAnchor()).detach();
-                                        System.out.println(list.get(0).getLongitude() + " 8====> " + list.get(0).getLatitude());
+                                        System.out.println(list.get(0).getLongitude() + " 8====> "
+                                                + list.get(0).getLatitude());
                                         System.out.println(node.getLocalPosition());
                                         node.setWorldPosition(new Vector3(0, 0, 0));
                                         System.out.println(node.getLocalPosition());
@@ -202,7 +282,8 @@ public class ArActivity extends AppCompatActivity {
 
                             if (frame.getCamera().getTrackingState() == TrackingState.TRACKING) {
                                 if (!placed) {
-                                    Pose pos = frame.getCamera().getPose().compose(Pose.makeTranslation(0, 0f, 0f));
+                                    Pose pos =
+                                            frame.getCamera().getPose().compose(Pose.makeTranslation(0, 0f, 0f));
                                     Anchor anchor = arSceneView.getSession().createAnchor(pos);
                                     AnchorNode anchorNode = new AnchorNode(anchor);
                                     anchorNode.setParent(arSceneView.getScene());
@@ -215,9 +296,13 @@ public class ArActivity extends AppCompatActivity {
                                     arrow.setRenderable(arrowRenderable);
                                     placed = true; //to place the arrow just once.
                                 } else {
-                                    Node arrow = arSceneView.getScene().getCamera().getChildren().get(0);
+                                    Node arrow =
+                                            arSceneView.getScene().getCamera().getChildren().get(0);
                                     //方位角,-倾斜角，-滚动角
-                                    arrow.setLocalRotation(Quaternion.eulerAngles(new Vector3(rotateDegree[1], -rotateDegree[0], -rotateDegree[2])));
+//                                    arrow.setLocalRotation(Quaternion.eulerAngles(new Vector3
+//                                    (rotateDegree[1], -rotateDegree[0], -rotateDegree[2])));
+                                    arrow.setLocalRotation(Quaternion.eulerAngles(new Vector3( rotateDegree[0], rotateDegree[1],rotateDegree[2])));
+
 //                                    degree += 1;
 //                                    System.out.println(degree);
 //                                    if (degree > 360) {
@@ -285,7 +370,11 @@ public class ArActivity extends AppCompatActivity {
     protected void onResume() {
         super.onResume();
         //sensor
-        sensorManager.registerListener(orientationEventListener, orientationSenser,sensorManager.SENSOR_DELAY_FASTEST);
+//        sensorManager.registerListener(orientationEventListener, orientationSenser,
+//                sensorManager.SENSOR_DELAY_FASTEST);
+        sensorManager.registerListener(sensorListener, accSensor, sensorManager.SENSOR_DELAY_GAME);
+        sensorManager.registerListener(sensorListener, magSensor, sensorManager.SENSOR_DELAY_GAME);
+        sensorManager.registerListener(sensorListener, oriSensor, sensorManager.SENSOR_DELAY_GAME);
 
         if (locationScene != null) {
             locationScene.resume();
@@ -324,7 +413,7 @@ public class ArActivity extends AppCompatActivity {
     public void onPause() {
         super.onPause();
         //sensor
-        sensorManager.unregisterListener(orientationEventListener);
+        sensorManager.unregisterListener(sensorListener);
         if (locationScene != null) {
             locationScene.pause();
         }
@@ -339,7 +428,8 @@ public class ArActivity extends AppCompatActivity {
     }
 
     @Override
-    public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] results) {
+    public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions,
+                                           @NonNull int[] results) {
         super.onRequestPermissionsResult(requestCode, permissions, results);
         if (!ARLocationPermissionHelper.hasPermission(this)) {
             if (!ARLocationPermissionHelper.shouldShowRequestPermissionRationale(this)) {
