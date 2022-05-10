@@ -71,10 +71,10 @@ public class ArActivity extends AppCompatActivity {
     private ImageView arReturnBtn;
     private static boolean placed = false;
     private static float[] rotateDegree = new float[3];
-    //gyroscope
+    //sensor
     private SensorManager sensorManager;
-    private Sensor gyroscopeSenser;
-    private SensorEventListener gyroscopeEventListener;
+    private Sensor orientationSenser;
+    private SensorEventListener orientationEventListener;
     private static final float NS2S = 1.0f / 1000000000.0f;
     private float timestamp;
 
@@ -85,15 +85,15 @@ public class ArActivity extends AppCompatActivity {
         setContentView(binding.getRoot());
         arSceneView = findViewById(R.id.ar_scene_view);
         arReturnBtn = findViewById(R.id.arReturnBtn);
-        //Gyroscope
+        //sensor
         sensorManager = (SensorManager) getSystemService(SENSOR_SERVICE);
-        gyroscopeSenser = sensorManager.getDefaultSensor(Sensor.TYPE_ORIENTATION);
+        orientationSenser = sensorManager.getDefaultSensor(Sensor.TYPE_ORIENTATION);
 
-        if (gyroscopeSenser == null){
-            Toast.makeText(this, "The device has no Gyroscope !", Toast.LENGTH_SHORT).show();
+        if (orientationSenser == null){
+            Toast.makeText(this, "The device has no orientation sensor!", Toast.LENGTH_SHORT).show();
             finish();
         }
-        gyroscopeEventListener = new SensorEventListener() {
+        orientationEventListener = new SensorEventListener() {
             @Override
             public void onSensorChanged(SensorEvent sensorEvent) {
                 System.out.println("方位角：" + (float) (Math.round(sensorEvent.values[0] * 100)) / 100);
@@ -284,8 +284,8 @@ public class ArActivity extends AppCompatActivity {
     @Override
     protected void onResume() {
         super.onResume();
-        //gyroscope
-        sensorManager.registerListener(gyroscopeEventListener,gyroscopeSenser,sensorManager.SENSOR_DELAY_FASTEST);
+        //sensor
+        sensorManager.registerListener(orientationEventListener, orientationSenser,sensorManager.SENSOR_DELAY_FASTEST);
 
         if (locationScene != null) {
             locationScene.resume();
@@ -323,8 +323,8 @@ public class ArActivity extends AppCompatActivity {
     @Override
     public void onPause() {
         super.onPause();
-        //gyroscope
-        sensorManager.unregisterListener(gyroscopeEventListener);
+        //sensor
+        sensorManager.unregisterListener(orientationEventListener);
         if (locationScene != null) {
             locationScene.pause();
         }
