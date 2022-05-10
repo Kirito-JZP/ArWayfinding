@@ -13,6 +13,7 @@ import android.hardware.Sensor;
 import android.hardware.SensorEvent;
 import android.hardware.SensorEventListener;
 import android.hardware.SensorManager;
+
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
 
@@ -57,7 +58,7 @@ import uk.co.appoly.arcorelocation.utils.ARLocationPermissionHelper;
  * @version Revision: 0
  * Date: 2022/5/5 2:28
  */
-public class ArActivity extends AppCompatActivity {
+public class ArActivity extends AppCompatActivity implements SensorEventListener {
     private boolean installRequested;
     private boolean hasFinishedLoading = false;
     private Snackbar loadingMessageSnackbar = null;
@@ -73,41 +74,22 @@ public class ArActivity extends AppCompatActivity {
     private static float[] rotateDegree = new float[3];
     //sensor
     private SensorManager sensorManager;
-    private Sensor orientationSenser;
-    private SensorEventListener orientationEventListener;
-    private static final float NS2S = 1.0f / 1000000000.0f;
-    private float timestamp;
+    private final float[] accelerometerReading = new float[3];
+    private final float[] magnetometerReading = new float[3];
+    private final float[] rotationMatrix = new float[9];
+    private final float[] orientationAngles = new float[3];
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         binding = ActivityArBinding.inflate(getLayoutInflater());
         setContentView(binding.getRoot());
+        //sensor
+        sensorManager = (SensorManager) getSystemService(Context.SENSOR_SERVICE);
+
         arSceneView = findViewById(R.id.ar_scene_view);
         arReturnBtn = findViewById(R.id.arReturnBtn);
-        //sensor
-        sensorManager = (SensorManager) getSystemService(SENSOR_SERVICE);
-        orientationSenser = sensorManager.getDefaultSensor(Sensor.TYPE_ORIENTATION);
 
-        if (orientationSenser == null){
-            Toast.makeText(this, "The device has no orientation sensor!", Toast.LENGTH_SHORT).show();
-            finish();
-        }
-        orientationEventListener = new SensorEventListener() {
-            @Override
-            public void onSensorChanged(SensorEvent sensorEvent) {
-                System.out.println("方位角：" + (float) (Math.round(sensorEvent.values[0] * 100)) / 100);
-                System.out.println("倾斜角：" + (float) (Math.round(sensorEvent.values[1] * 100)) / 100);
-                System.out.println("滚动角：" + (float) (Math.round(sensorEvent.values[2] * 100)) / 100);
-                rotateDegree[0] = (float) (Math.round(sensorEvent.values[0] * 100)) / 100;
-                rotateDegree[1] = (float) (Math.round(sensorEvent.values[1] * 100)) / 100;
-                rotateDegree[2] = (float) (Math.round(sensorEvent.values[2] * 100)) / 100;
-            }
-            @Override
-            public void onAccuracyChanged(Sensor sensor, int i) {
-
-            }
-        };
         CompletableFuture<ViewRenderable> layout = ViewRenderable.builder().setView(this, R.layout.activity_ar_label).build();
 
         CompletableFuture<ModelRenderable> andyModel = andyRenderable.builder().setSource(this, R.raw.andy).build();
@@ -217,7 +199,20 @@ public class ArActivity extends AppCompatActivity {
                                 } else {
                                     Node arrow = arSceneView.getScene().getCamera().getChildren().get(0);
                                     //方位角,-倾斜角，-滚动角
-                                    arrow.setLocalRotation(Quaternion.eulerAngles(new Vector3(rotateDegree[1], -rotateDegree[0], -rotateDegree[2])));
+                                    if (Math.round(Math.toDegrees(orientationAngles[1]) / 15) * 15 % 90 != 0) {
+                                        arrow.setLocalRotation(Quaternion.eulerAngles(new Vector3(
+                                                Math.round(Math.toDegrees(orientationAngles[1]) / 20) * 20,
+                                                Math.round(Math.toDegrees(orientationAngles[2]) / 20) * 20,
+                                                Math.round(Math.toDegrees(orientationAngles[0]) / 20) * 20)));
+                                    }
+
+
+                                    System.out.println(
+                                            Math.round(Math.toDegrees(orientationAngles[1]) / 10) * 10 + "/n" +
+                                                    Math.round(Math.toDegrees(orientationAngles[2]) / 10) * 10 + "/n" +
+                                                    Math.round(Math.toDegrees(orientationAngles[0]) / 10) * 10 + "/n"
+                                    );
+
 //                                    degree += 1;
 //                                    System.out.println(degree);
 //                                    if (degree > 360) {
@@ -285,7 +280,16 @@ public class ArActivity extends AppCompatActivity {
     protected void onResume() {
         super.onResume();
         //sensor
-        sensorManager.registerListener(orientationEventListener, orientationSenser,sensorManager.SENSOR_DELAY_FASTEST);
+        Sensor accelerometer = sensorManager.getDefaultSensor(Sensor.TYPE_ACCELEROMETER);
+        if (accelerometer != null) {
+            sensorManager.registerListener(this, accelerometer,
+                    SensorManager.SENSOR_DELAY_NORMAL, SensorManager.SENSOR_DELAY_UI);
+        }
+        Sensor magneticField = sensorManager.getDefaultSensor(Sensor.TYPE_MAGNETIC_FIELD);
+        if (magneticField != null) {
+            sensorManager.registerListener(this, magneticField,
+                    SensorManager.SENSOR_DELAY_NORMAL, SensorManager.SENSOR_DELAY_UI);
+        }
 
         if (locationScene != null) {
             locationScene.resume();
@@ -324,7 +328,8 @@ public class ArActivity extends AppCompatActivity {
     public void onPause() {
         super.onPause();
         //sensor
-        sensorManager.unregisterListener(orientationEventListener);
+        sensorManager.unregisterListener(this);
+
         if (locationScene != null) {
             locationScene.pause();
         }
@@ -394,5 +399,24 @@ public class ArActivity extends AppCompatActivity {
 
         loadingMessageSnackbar.dismiss();
         loadingMessageSnackbar = null;
+    }
+
+    @Override
+    public void onSensorChanged(SensorEvent sensorEvent) {
+        if (sensorEvent.sensor.getType() == Sensor.TYPE_ACCELEROMETER) {
+            System.arraycopy(sensorEvent.values, 0, accelerometerReading,
+                    0, accelerometerReading.length);
+        } else if (sensorEvent.sensor.getType() == Sensor.TYPE_MAGNETIC_FIELD) {
+            System.arraycopy(sensorEvent.values, 0, magnetometerReading,
+                    0, magnetometerReading.length);
+        }
+        SensorManager.getRotationMatrix(rotationMatrix, null, accelerometerReading, magnetometerReading);
+        SensorManager.getOrientation(rotationMatrix, orientationAngles);
+
+    }
+
+    @Override
+    public void onAccuracyChanged(Sensor sensor, int i) {
+
     }
 }
