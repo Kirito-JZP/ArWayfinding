@@ -40,7 +40,6 @@ import com.main.arwayfinding.utility.PlaceUtils;
 
 import java.util.ArrayList;
 import java.util.Objects;
-import java.util.Random;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ExecutionException;
 
@@ -48,7 +47,6 @@ import uk.co.appoly.arcorelocation.LocationMarker;
 import uk.co.appoly.arcorelocation.LocationScene;
 import uk.co.appoly.arcorelocation.rendering.LocationNode;
 import uk.co.appoly.arcorelocation.rendering.LocationNodeRender;
-import uk.co.appoly.arcorelocation.sensor.DeviceLocationChanged;
 import uk.co.appoly.arcorelocation.utils.ARLocationPermissionHelper;
 
 /**
@@ -72,7 +70,7 @@ public class ArActivity extends AppCompatActivity {
     ArrayList<LocationDto> list;
     private ImageView arReturnBtn;
     private static boolean placed = false;
-    private static float degree = 180.0f;
+    private static float[] rotateDegree = new float[3];
     //gyroscope
     private SensorManager sensorManager;
     private Sensor gyroscopeSenser;
@@ -89,7 +87,7 @@ public class ArActivity extends AppCompatActivity {
         arReturnBtn = findViewById(R.id.arReturnBtn);
         //Gyroscope
         sensorManager = (SensorManager) getSystemService(SENSOR_SERVICE);
-        gyroscopeSenser = sensorManager.getDefaultSensor(Sensor.TYPE_GYROSCOPE);
+        gyroscopeSenser = sensorManager.getDefaultSensor(Sensor.TYPE_ORIENTATION);
 
         if (gyroscopeSenser == null){
             Toast.makeText(this, "The device has no Gyroscope !", Toast.LENGTH_SHORT).show();
@@ -98,12 +96,12 @@ public class ArActivity extends AppCompatActivity {
         gyroscopeEventListener = new SensorEventListener() {
             @Override
             public void onSensorChanged(SensorEvent sensorEvent) {
-                if(timestamp!=0){
-                    final float dT = (sensorEvent.timestamp - timestamp) * NS2S;
-
-                    System.out.println("X: "+sensorEvent.values[0]*dT + " Y: " +sensorEvent.values[1]*dT + " Z: " +sensorEvent.values[2]*dT);
-                }
-                timestamp = sensorEvent.timestamp;
+                System.out.println("方位角：" + (float) (Math.round(sensorEvent.values[0] * 100)) / 100);
+                System.out.println("倾斜角：" + (float) (Math.round(sensorEvent.values[1] * 100)) / 100);
+                System.out.println("滚动角：" + (float) (Math.round(sensorEvent.values[2] * 100)) / 100);
+                rotateDegree[0] = (float) (Math.round(sensorEvent.values[0] * 100)) / 100;
+                rotateDegree[1] = (float) (Math.round(sensorEvent.values[1] * 100)) / 100;
+                rotateDegree[2] = (float) (Math.round(sensorEvent.values[2] * 100)) / 100;
             }
             @Override
             public void onAccuracyChanged(Sensor sensor, int i) {
@@ -116,7 +114,7 @@ public class ArActivity extends AppCompatActivity {
         CompletableFuture<ModelRenderable> arrowModel = andyRenderable.builder().setSource(this, R.raw.arrow).build();
 
         CompletableFuture.allOf(layout, andyModel).handle((notUsed, throwable) -> {
-            // When you build a Renderable, Sceneform loads its resources in the
+            // When build a Renderable, Sceneform loads its resources in the
             // background while
             // returning a CompletableFuture. Call handle(), thenAccept(), or check isDone()
             // before calling get().
@@ -218,12 +216,13 @@ public class ArActivity extends AppCompatActivity {
                                     placed = true; //to place the arrow just once.
                                 } else {
                                     Node arrow = arSceneView.getScene().getCamera().getChildren().get(0);
-                                    arrow.setLocalRotation(Quaternion.eulerAngles(new Vector3(0.0f, degree, degree)));
-                                    degree += 1;
-                                    System.out.println(degree);
-                                    if (degree > 360) {
-                                        degree = 0;
-                                    }
+                                    //方位角,-倾斜角，-滚动角
+                                    arrow.setLocalRotation(Quaternion.eulerAngles(new Vector3(rotateDegree[1], -rotateDegree[0], -rotateDegree[2])));
+//                                    degree += 1;
+//                                    System.out.println(degree);
+//                                    if (degree > 360) {
+//                                        degree = 0;
+//                                    }
                                 }
                             }
 
