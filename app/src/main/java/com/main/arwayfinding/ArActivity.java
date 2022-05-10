@@ -71,7 +71,6 @@ public class ArActivity extends AppCompatActivity {
     private ImageView arReturnBtn;
     private static boolean placed = false;
     private static float degree = 180.0f;
-    Node oldNode = null;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -187,21 +186,19 @@ public class ArActivity extends AppCompatActivity {
                                 // arrow.setLocalRotation();
                                 Node arrow = new Node();
                                 arrow.setLocalPosition((new Vector3(0.0f, 0.0f, -1.0f)));
-
+                                arSceneView.getScene().getCamera().addChild(arrow);
+                                //arrow.setParent(anchorNode);
+                                arrow.setRenderable(modelRenderable);
+                                placed = true; //to place the arrow just once.
+                            }
+                            if(placed){
+                                Node arrow = arSceneView.getScene().getCamera().getChildren().get(0);
                                 arrow.setLocalRotation(Quaternion.axisAngle(new Vector3(0.0f, 0.0f, 1.0f), degree));
                                 degree+=1;
                                 System.out.println(degree);
                                 if (degree > 360) {
                                     degree = 0;
                                 }
-                                arSceneView.getScene().getCamera().addChild(arrow);
-                                if(oldNode!=null){
-                                    arSceneView.getScene().getCamera().removeChild(oldNode);
-                                }
-                                oldNode = arrow;
-                                //arrow.setParent(anchorNode);
-                                arrow.setRenderable(modelRenderable);
-//                                placed = true; //to place the arrow just once.
                             }
 
                             if (locationScene != null) {
