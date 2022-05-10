@@ -25,6 +25,7 @@ import com.google.ar.core.exceptions.UnavailableException;
 import com.google.ar.sceneform.AnchorNode;
 import com.google.ar.sceneform.ArSceneView;
 import com.google.ar.sceneform.Node;
+import com.google.ar.sceneform.math.Quaternion;
 import com.google.ar.sceneform.math.Vector3;
 import com.google.ar.sceneform.rendering.ModelRenderable;
 import com.google.ar.sceneform.rendering.ViewRenderable;
@@ -172,14 +173,17 @@ public class ArActivity extends AppCompatActivity {
                                 return;
                             }
                             if(frame.getCamera().getTrackingState()==TrackingState.TRACKING && !placed) {
-                                Pose pos = frame.getCamera().getPose().compose(Pose.makeTranslation(0, 0f, -0.3f));
+                                Pose pos = frame.getCamera().getPose().compose(Pose.makeTranslation(0, 0f, 0f));
                                 Anchor anchor = arSceneView.getSession().createAnchor(pos);
                                 AnchorNode anchorNode = new AnchorNode(anchor);
                                 anchorNode.setParent(arSceneView.getScene());
 
                                 // Create the arrow node and add it to the anchor.
                                 Node arrow = new Node();
-                                arrow.setLocalPosition((new Vector3(0.1f,0.1f, -1.0f)));
+                                //float random_num = (float) Math.floor(Math.random()*(180-0+1)+0);
+                                // Quaternion quaternion = Quaternion.axisAngle(Vector3(0.0f, 0.0f, 1.0f), -45.0f);
+                                // arrow.setLocalRotation();
+                                arrow.setLocalPosition((new Vector3(0.0f,0.0f, -1.0f)));
                                 arSceneView.getScene().getCamera().addChild(arrow);
                                 //arrow.setParent(anchorNode);
                                 arrow.setRenderable(modelRenderable);
