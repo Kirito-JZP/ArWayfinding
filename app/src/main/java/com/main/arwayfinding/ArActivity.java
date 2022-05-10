@@ -198,7 +198,6 @@ public class ArActivity extends AppCompatActivity implements SensorEventListener
                                     placed = true; //to place the arrow just once.
                                 } else {
                                     Node arrow = arSceneView.getScene().getCamera().getChildren().get(0);
-                                    //方位角,-倾斜角，-滚动角
                                     if (Math.round(Math.toDegrees(orientationAngles[1]) / 15) * 15 % 90 != 0) {
                                         arrow.setLocalRotation(Quaternion.eulerAngles(new Vector3(
                                                 Math.round(Math.toDegrees(orientationAngles[1]) / 20) * 20,
@@ -212,12 +211,6 @@ public class ArActivity extends AppCompatActivity implements SensorEventListener
                                                     Math.round(Math.toDegrees(orientationAngles[2]) / 10) * 10 + "/n" +
                                                     Math.round(Math.toDegrees(orientationAngles[0]) / 10) * 10 + "/n"
                                     );
-
-//                                    degree += 1;
-//                                    System.out.println(degree);
-//                                    if (degree > 360) {
-//                                        degree = 0;
-//                                    }
                                 }
                             }
 
