@@ -1,14 +1,7 @@
 package com.main.arwayfinding;
 
-import android.annotation.SuppressLint;
 import android.content.Context;
 import android.content.Intent;
-
-import android.hardware.Sensor;
-import android.hardware.SensorEvent;
-import android.hardware.SensorEventListener;
-import android.hardware.SensorManager;
-
 import android.location.Location;
 import android.os.Bundle;
 import android.view.View;
@@ -32,6 +25,7 @@ import com.google.ar.core.exceptions.UnavailableException;
 import com.google.ar.sceneform.AnchorNode;
 import com.google.ar.sceneform.ArSceneView;
 import com.google.ar.sceneform.Node;
+import com.google.ar.sceneform.math.Quaternion;
 import com.google.ar.sceneform.math.Vector3;
 import com.google.ar.sceneform.rendering.ModelRenderable;
 import com.google.ar.sceneform.rendering.ViewRenderable;
@@ -41,9 +35,9 @@ import com.main.arwayfinding.logic.GPSTrackerLogic;
 import com.main.arwayfinding.utility.ArLocationUtils;
 import com.main.arwayfinding.utility.PlaceUtils;
 
-import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Objects;
+import java.util.Random;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ExecutionException;
 
@@ -67,21 +61,15 @@ public class ArActivity extends AppCompatActivity {
     private boolean hasFinishedLoading = false;
     private Snackbar loadingMessageSnackbar = null;
     private ArSceneView arSceneView;
-    private ModelRenderable modelRenderable;
+    private ModelRenderable andyRenderable;
+    private ModelRenderable arrowRenderable;
     private ViewRenderable layoutRenderable;
     private LocationScene locationScene;
     private ActivityArBinding binding;
     ArrayList<LocationDto> list;
-    private Location lastPosition;
-    private boolean needUpdate;
     private ImageView arReturnBtn;
     private static boolean placed = false;
-    //gyroscope
-    private SensorManager sensorManager;
-    private Sensor gyroscopeSenser;
-    private SensorEventListener gyroscopeEventListener;
-    private static final float NS2S = 1.0f / 1000000000.0f;
-    private float timestamp;
+    private static float degree = 180.0f;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -90,35 +78,13 @@ public class ArActivity extends AppCompatActivity {
         setContentView(binding.getRoot());
         arSceneView = findViewById(R.id.ar_scene_view);
         arReturnBtn = findViewById(R.id.arReturnBtn);
-        //Gyroscope
-        sensorManager = (SensorManager) getSystemService(SENSOR_SERVICE);
-        gyroscopeSenser = sensorManager.getDefaultSensor(Sensor.TYPE_GYROSCOPE);
 
-        if (gyroscopeSenser == null){
-            Toast.makeText(this, "The device has no Gyroscope !", Toast.LENGTH_SHORT).show();
-            finish();
-        }
-        gyroscopeEventListener = new SensorEventListener() {
-            @Override
-            public void onSensorChanged(SensorEvent sensorEvent) {
-                if(timestamp!=0){
-                    final float dT = (sensorEvent.timestamp - timestamp) * NS2S;
-
-                    System.out.println("X: "+sensorEvent.values[0]*dT + " Y: " +sensorEvent.values[1]*dT + " Z: " +sensorEvent.values[2]*dT);
-                }
-                timestamp = sensorEvent.timestamp;
-            }
-
-            @Override
-            public void onAccuracyChanged(Sensor sensor, int i) {
-
-            }
-        };
         CompletableFuture<ViewRenderable> layout = ViewRenderable.builder().setView(this, R.layout.activity_ar_label).build();
 
-        CompletableFuture<ModelRenderable> model = ModelRenderable.builder().setSource(this, R.raw.andy).build();
+        CompletableFuture<ModelRenderable> andyModel = andyRenderable.builder().setSource(this, R.raw.andy).build();
+        CompletableFuture<ModelRenderable> arrowModel = andyRenderable.builder().setSource(this, R.raw.arrow).build();
 
-        CompletableFuture.allOf(layout, model).handle((notUsed, throwable) -> {
+        CompletableFuture.allOf(layout, andyModel).handle((notUsed, throwable) -> {
             // When you build a Renderable, Sceneform loads its resources in the
             // background while
             // returning a CompletableFuture. Call handle(), thenAccept(), or check isDone()
@@ -129,7 +95,8 @@ public class ArActivity extends AppCompatActivity {
             }
             try {
                 layoutRenderable = layout.get();
-                modelRenderable = model.get();
+                andyRenderable = andyModel.get();
+                arrowRenderable = arrowModel.get();
                 hasFinishedLoading = true;
             } catch (InterruptedException | ExecutionException ex) {
                 ArLocationUtils.displayError(this, "Unable to load renderables", ex);
@@ -149,78 +116,84 @@ public class ArActivity extends AppCompatActivity {
                             if (locationScene == null) {
                                 // If our locationScene object hasn't been setup yet, this is a good time to do it
                                 // We know that here, the AR components have been initiated.
-//                                locationScene = new LocationScene(this, this, arSceneView);
-//                                ArActivity thisActivity = this;
-//                                GPSTrackerLogic trackerLogic = new GPSTrackerLogic(thisActivity);
-//                                Location location = trackerLogic.getLocation(thisActivity);
-                                //list = PlaceUtils.getNearby(location);
+                                locationScene = new LocationScene(this, this, arSceneView);
+                                ArActivity thisActivity = this;
+                                GPSTrackerLogic trackerLogic = new GPSTrackerLogic(thisActivity);
+                                Location location = trackerLogic.getLocation(thisActivity);
+                                list = PlaceUtils.getNearby(location);
 
                                 // Now lets create our location markers.
                                 // First, a layout
-//                                LocationMarker viewLocationMarker = new LocationMarker(
-//                                        list.get(0).getLongitude(),
-//                                        list.get(0).getLatitude(),
-//                                        createViewNode()
-//                                );
+                                LocationMarker viewLocationMarker = new LocationMarker(
+                                        list.get(0).getLongitude(),
+                                        list.get(0).getLatitude(),
+                                        createViewNode()
+                                );
 
                                 // Updates the layout with the markers distance
-//                                String name = list.get(0).getName();
-//                                viewLocationMarker.setRenderEvent(new LocationNodeRender() {
-//                                    @Override
-//                                    public void render(LocationNode node) {
-//                                        View eView = layoutRenderable.getView();
-//                                        TextView distanceTextView = eView.findViewById(R.id.loc_distance);
-//                                        TextView nameTextView = eView.findViewById(R.id.loc_name);
-//                                        nameTextView.setText(name);
-//                                        distanceTextView.setText(node.getDistance() + "M");
-//                                    }
-//                                });
+                                String name = list.get(0).getName();
+                                viewLocationMarker.setRenderEvent(new LocationNodeRender() {
+                                    @Override
+                                    public void render(LocationNode node) {
+                                        View eView = layoutRenderable.getView();
+                                        TextView distanceTextView = eView.findViewById(R.id.loc_distance);
+                                        TextView nameTextView = eView.findViewById(R.id.loc_name);
+                                        nameTextView.setText(name);
+                                        distanceTextView.setText(node.getDistance() + "M");
+                                    }
+                                });
 
-//                                LocationMarker modelLocationMarker = new LocationMarker(
-//                                        list.get(0).getLongitude(),
-//                                        list.get(0).getLatitude(),
-//                                        createModelNode());
-//                                modelLocationMarker.setRenderEvent(new LocationNodeRender() {
-//                                    @Override
-//                                    public void render(LocationNode node) {
-//                                        Objects.requireNonNull(node.getAnchor()).detach();
-//                                        System.out.println(list.get(0).getLongitude()+" 8====> "+list.get(0).getLatitude());
-//                                        System.out.println(node.getLocalPosition());
-//                                        node.setWorldPosition(new Vector3(0,0,0));
-//                                        System.out.println(node.getLocalPosition());
-//                                        System.out.println(node.getWorldPosition());
-//                                    }
-//                                });
+                                LocationMarker modelLocationMarker = new LocationMarker(
+                                        list.get(0).getLongitude(),
+                                        list.get(0).getLatitude(),
+                                        createModelNode());
+                                modelLocationMarker.setRenderEvent(new LocationNodeRender() {
+                                    @Override
+                                    public void render(LocationNode node) {
+                                        Objects.requireNonNull(node.getAnchor()).detach();
+                                        System.out.println(list.get(0).getLongitude() + " 8====> " + list.get(0).getLatitude());
+                                        System.out.println(node.getLocalPosition());
+                                        node.setWorldPosition(new Vector3(0, 0, 0));
+                                        System.out.println(node.getLocalPosition());
+                                        System.out.println(node.getWorldPosition());
+                                    }
+                                });
 
-//                                // Adding the marker
-//                                locationScene.mLocationMarkers.add(viewLocationMarker);
-//                                // Adding a simple location marker of a 3D model
-//                                locationScene.mLocationMarkers.add(modelLocationMarker);
+                                // Adding the marker
+                                locationScene.mLocationMarkers.add(viewLocationMarker);
+                                // Adding a simple location marker of a 3D model
+                                locationScene.mLocationMarkers.add(modelLocationMarker);
                             }
 
                             Frame frame = arSceneView.getArFrame();
-                            //test
 
-                            if (frame == null) {
+                            if (frame == null || frame.getCamera().getTrackingState() != TrackingState.TRACKING) {
                                 return;
                             }
 
-                            if (frame.getCamera().getTrackingState() != TrackingState.TRACKING) {
-                                return;
-                            }
-                            if(frame.getCamera().getTrackingState()==TrackingState.TRACKING && !placed) {
-                                Pose pos = frame.getCamera().getPose().compose(Pose.makeTranslation(0, 0f, -0.3f));
-                                Anchor anchor = arSceneView.getSession().createAnchor(pos);
-                                AnchorNode anchorNode = new AnchorNode(anchor);
-                                anchorNode.setParent(arSceneView.getScene());
+                            if (frame.getCamera().getTrackingState() == TrackingState.TRACKING) {
+                                if (!placed) {
+                                    Pose pos = frame.getCamera().getPose().compose(Pose.makeTranslation(0, 0f, 0f));
+                                    Anchor anchor = arSceneView.getSession().createAnchor(pos);
+                                    AnchorNode anchorNode = new AnchorNode(anchor);
+                                    anchorNode.setParent(arSceneView.getScene());
 
-                                // Create the arrow node and add it to the anchor.
-                                Node arrow = new Node();
-                                arrow.setLocalPosition((new Vector3(0.1f,0.1f, -1.0f)));
-                                arSceneView.getScene().getCamera().addChild(arrow);
-                                //arrow.setParent(anchorNode);
-                                arrow.setRenderable(modelRenderable);
-                                placed = true; //to place the arrow just once.
+                                    // Create the arrow node and add it to the anchor.
+                                    Node arrow = new Node();
+                                    arrow.setLocalPosition((new Vector3(0.0f, 0.0f, -1.0f)));
+                                    arSceneView.getScene().getCamera().addChild(arrow);
+                                    //arrow.setParent(anchorNode);
+                                    arrow.setRenderable(arrowRenderable);
+                                    placed = true; //to place the arrow just once.
+                                } else {
+                                    Node arrow = arSceneView.getScene().getCamera().getChildren().get(0);
+                                    arrow.setLocalRotation(Quaternion.axisAngle(new Vector3(0.0f, 0.0f, 1.0f), degree));
+                                    degree += 1;
+                                    System.out.println(degree);
+                                    if (degree > 360) {
+                                        degree = 0;
+                                    }
+                                }
                             }
 
                             if (locationScene != null) {
@@ -268,7 +241,7 @@ public class ArActivity extends AppCompatActivity {
 
     private Node createModelNode() {
         Node base = new Node();
-        base.setRenderable(modelRenderable);
+        base.setRenderable(andyRenderable);
         Context c = this;
         base.setOnTapListener((v, event) -> {
             Toast.makeText(
@@ -281,8 +254,6 @@ public class ArActivity extends AppCompatActivity {
     @Override
     protected void onResume() {
         super.onResume();
-        //gyroscope
-        sensorManager.registerListener(gyroscopeEventListener,gyroscopeSenser,sensorManager.SENSOR_DELAY_FASTEST);
 
         if (locationScene != null) {
             locationScene.resume();
@@ -320,8 +291,7 @@ public class ArActivity extends AppCompatActivity {
     @Override
     public void onPause() {
         super.onPause();
-        //gyroscope
-        sensorManager.unregisterListener(gyroscopeEventListener);
+
         if (locationScene != null) {
             locationScene.pause();
         }
