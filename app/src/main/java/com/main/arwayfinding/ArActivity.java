@@ -79,6 +79,7 @@ public class ArActivity extends AppCompatActivity {
     private SensorEventListener gyroscopeEventListener;
     private static final float NS2S = 1.0f / 1000000000.0f;
     private float timestamp;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -217,7 +218,7 @@ public class ArActivity extends AppCompatActivity {
                                     placed = true; //to place the arrow just once.
                                 } else {
                                     Node arrow = arSceneView.getScene().getCamera().getChildren().get(0);
-                                    arrow.setLocalRotation(Quaternion.axisAngle(new Vector3(0.0f, 0.0f, 1.0f), degree));
+                                    arrow.setLocalRotation(Quaternion.eulerAngles(new Vector3(0.0f, degree, degree)));
                                     degree += 1;
                                     System.out.println(degree);
                                     if (degree > 360) {
