@@ -9,7 +9,10 @@ import android.view.WindowManager;
 import android.widget.ImageView;
 import android.widget.TextView;
 import android.widget.Toast;
-
+import android.hardware.Sensor;
+import android.hardware.SensorEvent;
+import android.hardware.SensorEventListener;
+import android.hardware.SensorManager;
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
 
@@ -70,7 +73,12 @@ public class ArActivity extends AppCompatActivity {
     private ImageView arReturnBtn;
     private static boolean placed = false;
     private static float degree = 180.0f;
-
+    //gyroscope
+    private SensorManager sensorManager;
+    private Sensor gyroscopeSenser;
+    private SensorEventListener gyroscopeEventListener;
+    private static final float NS2S = 1.0f / 1000000000.0f;
+    private float timestamp;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -78,7 +86,29 @@ public class ArActivity extends AppCompatActivity {
         setContentView(binding.getRoot());
         arSceneView = findViewById(R.id.ar_scene_view);
         arReturnBtn = findViewById(R.id.arReturnBtn);
+        //Gyroscope
+        sensorManager = (SensorManager) getSystemService(SENSOR_SERVICE);
+        gyroscopeSenser = sensorManager.getDefaultSensor(Sensor.TYPE_GYROSCOPE);
 
+        if (gyroscopeSenser == null){
+            Toast.makeText(this, "The device has no Gyroscope !", Toast.LENGTH_SHORT).show();
+            finish();
+        }
+        gyroscopeEventListener = new SensorEventListener() {
+            @Override
+            public void onSensorChanged(SensorEvent sensorEvent) {
+                if(timestamp!=0){
+                    final float dT = (sensorEvent.timestamp - timestamp) * NS2S;
+
+                    System.out.println("X: "+sensorEvent.values[0]*dT + " Y: " +sensorEvent.values[1]*dT + " Z: " +sensorEvent.values[2]*dT);
+                }
+                timestamp = sensorEvent.timestamp;
+            }
+            @Override
+            public void onAccuracyChanged(Sensor sensor, int i) {
+
+            }
+        };
         CompletableFuture<ViewRenderable> layout = ViewRenderable.builder().setView(this, R.layout.activity_ar_label).build();
 
         CompletableFuture<ModelRenderable> andyModel = andyRenderable.builder().setSource(this, R.raw.andy).build();
@@ -254,6 +284,8 @@ public class ArActivity extends AppCompatActivity {
     @Override
     protected void onResume() {
         super.onResume();
+        //gyroscope
+        sensorManager.registerListener(gyroscopeEventListener,gyroscopeSenser,sensorManager.SENSOR_DELAY_FASTEST);
 
         if (locationScene != null) {
             locationScene.resume();
@@ -291,7 +323,8 @@ public class ArActivity extends AppCompatActivity {
     @Override
     public void onPause() {
         super.onPause();
-
+        //gyroscope
+        sensorManager.unregisterListener(gyroscopeEventListener);
         if (locationScene != null) {
             locationScene.pause();
         }
