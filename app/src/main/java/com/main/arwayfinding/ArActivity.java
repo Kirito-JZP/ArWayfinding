@@ -61,13 +61,12 @@ public class ArActivity extends AppCompatActivity {
     private boolean hasFinishedLoading = false;
     private Snackbar loadingMessageSnackbar = null;
     private ArSceneView arSceneView;
-    private ModelRenderable modelRenderable;
+    private ModelRenderable andyRenderable;
+    private ModelRenderable arrowRenderable;
     private ViewRenderable layoutRenderable;
     private LocationScene locationScene;
     private ActivityArBinding binding;
     ArrayList<LocationDto> list;
-    private Location lastPosition;
-    private boolean needUpdate;
     private ImageView arReturnBtn;
     private static boolean placed = false;
     private static float degree = 180.0f;
@@ -82,9 +81,10 @@ public class ArActivity extends AppCompatActivity {
 
         CompletableFuture<ViewRenderable> layout = ViewRenderable.builder().setView(this, R.layout.activity_ar_label).build();
 
-        CompletableFuture<ModelRenderable> model = ModelRenderable.builder().setSource(this, R.raw.andy).build();
+        CompletableFuture<ModelRenderable> andyModel = andyRenderable.builder().setSource(this, R.raw.andy).build();
+        CompletableFuture<ModelRenderable> arrowModel = andyRenderable.builder().setSource(this, R.raw.arrow).build();
 
-        CompletableFuture.allOf(layout, model).handle((notUsed, throwable) -> {
+        CompletableFuture.allOf(layout, andyModel).handle((notUsed, throwable) -> {
             // When you build a Renderable, Sceneform loads its resources in the
             // background while
             // returning a CompletableFuture. Call handle(), thenAccept(), or check isDone()
@@ -95,7 +95,8 @@ public class ArActivity extends AppCompatActivity {
             }
             try {
                 layoutRenderable = layout.get();
-                modelRenderable = model.get();
+                andyRenderable = andyModel.get();
+                arrowRenderable = arrowModel.get();
                 hasFinishedLoading = true;
             } catch (InterruptedException | ExecutionException ex) {
                 ArLocationUtils.displayError(this, "Unable to load renderables", ex);
@@ -165,39 +166,33 @@ public class ArActivity extends AppCompatActivity {
                             }
 
                             Frame frame = arSceneView.getArFrame();
-                            //test
 
-                            if (frame == null) {
+                            if (frame == null || frame.getCamera().getTrackingState() != TrackingState.TRACKING) {
                                 return;
                             }
 
-                            if (frame.getCamera().getTrackingState() != TrackingState.TRACKING) {
-                                return;
-                            }
-                            if (frame.getCamera().getTrackingState() == TrackingState.TRACKING && !placed) {
-                                Pose pos = frame.getCamera().getPose().compose(Pose.makeTranslation(0, 0f, 0f));
-                                Anchor anchor = arSceneView.getSession().createAnchor(pos);
-                                AnchorNode anchorNode = new AnchorNode(anchor);
-                                anchorNode.setParent(arSceneView.getScene());
+                            if (frame.getCamera().getTrackingState() == TrackingState.TRACKING) {
+                                if (!placed) {
+                                    Pose pos = frame.getCamera().getPose().compose(Pose.makeTranslation(0, 0f, 0f));
+                                    Anchor anchor = arSceneView.getSession().createAnchor(pos);
+                                    AnchorNode anchorNode = new AnchorNode(anchor);
+                                    anchorNode.setParent(arSceneView.getScene());
 
-                                // Create the arrow node and add it to the anchor.
-                                //float random_num = (float) Math.floor(Math.random()*(180-0+1)+0);
-                                // Quaternion quaternion = Quaternion.axisAngle(Vector3(0.0f, 0.0f, 1.0f), -45.0f);
-                                // arrow.setLocalRotation();
-                                Node arrow = new Node();
-                                arrow.setLocalPosition((new Vector3(0.0f, 0.0f, -1.0f)));
-                                arSceneView.getScene().getCamera().addChild(arrow);
-                                //arrow.setParent(anchorNode);
-                                arrow.setRenderable(modelRenderable);
-                                placed = true; //to place the arrow just once.
-                            }
-                            if(placed){
-                                Node arrow = arSceneView.getScene().getCamera().getChildren().get(0);
-                                arrow.setLocalRotation(Quaternion.axisAngle(new Vector3(0.0f, 0.0f, 1.0f), degree));
-                                degree+=1;
-                                System.out.println(degree);
-                                if (degree > 360) {
-                                    degree = 0;
+                                    // Create the arrow node and add it to the anchor.
+                                    Node arrow = new Node();
+                                    arrow.setLocalPosition((new Vector3(0.0f, 0.0f, -1.0f)));
+                                    arSceneView.getScene().getCamera().addChild(arrow);
+                                    //arrow.setParent(anchorNode);
+                                    arrow.setRenderable(arrowRenderable);
+                                    placed = true; //to place the arrow just once.
+                                } else {
+                                    Node arrow = arSceneView.getScene().getCamera().getChildren().get(0);
+                                    arrow.setLocalRotation(Quaternion.axisAngle(new Vector3(0.0f, 0.0f, 1.0f), degree));
+                                    degree += 1;
+                                    System.out.println(degree);
+                                    if (degree > 360) {
+                                        degree = 0;
+                                    }
                                 }
                             }
 
@@ -246,7 +241,7 @@ public class ArActivity extends AppCompatActivity {
 
     private Node createModelNode() {
         Node base = new Node();
-        base.setRenderable(modelRenderable);
+        base.setRenderable(andyRenderable);
         Context c = this;
         base.setOnTapListener((v, event) -> {
             Toast.makeText(
