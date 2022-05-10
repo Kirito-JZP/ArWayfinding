@@ -37,6 +37,7 @@ import com.main.arwayfinding.utility.PlaceUtils;
 
 import java.util.ArrayList;
 import java.util.Objects;
+import java.util.Random;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ExecutionException;
 
@@ -69,6 +70,8 @@ public class ArActivity extends AppCompatActivity {
     private boolean needUpdate;
     private ImageView arReturnBtn;
     private static boolean placed = false;
+    private static float degree = 180.0f;
+    Node oldNode = null;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -148,9 +151,9 @@ public class ArActivity extends AppCompatActivity {
                                     @Override
                                     public void render(LocationNode node) {
                                         Objects.requireNonNull(node.getAnchor()).detach();
-                                        System.out.println(list.get(0).getLongitude()+" 8====> "+list.get(0).getLatitude());
+                                        System.out.println(list.get(0).getLongitude() + " 8====> " + list.get(0).getLatitude());
                                         System.out.println(node.getLocalPosition());
-                                        node.setWorldPosition(new Vector3(0,0,0));
+                                        node.setWorldPosition(new Vector3(0, 0, 0));
                                         System.out.println(node.getLocalPosition());
                                         System.out.println(node.getWorldPosition());
                                     }
@@ -172,22 +175,33 @@ public class ArActivity extends AppCompatActivity {
                             if (frame.getCamera().getTrackingState() != TrackingState.TRACKING) {
                                 return;
                             }
-                            if(frame.getCamera().getTrackingState()==TrackingState.TRACKING && !placed) {
+                            if (frame.getCamera().getTrackingState() == TrackingState.TRACKING && !placed) {
                                 Pose pos = frame.getCamera().getPose().compose(Pose.makeTranslation(0, 0f, 0f));
                                 Anchor anchor = arSceneView.getSession().createAnchor(pos);
                                 AnchorNode anchorNode = new AnchorNode(anchor);
                                 anchorNode.setParent(arSceneView.getScene());
 
                                 // Create the arrow node and add it to the anchor.
-                                Node arrow = new Node();
                                 //float random_num = (float) Math.floor(Math.random()*(180-0+1)+0);
                                 // Quaternion quaternion = Quaternion.axisAngle(Vector3(0.0f, 0.0f, 1.0f), -45.0f);
                                 // arrow.setLocalRotation();
-                                arrow.setLocalPosition((new Vector3(0.0f,0.0f, -1.0f)));
+                                Node arrow = new Node();
+                                arrow.setLocalPosition((new Vector3(0.0f, 0.0f, -1.0f)));
+
+                                arrow.setLocalRotation(Quaternion.axisAngle(new Vector3(0.0f, 0.0f, 1.0f), degree));
+                                degree+=1;
+                                System.out.println(degree);
+                                if (degree > 360) {
+                                    degree = 0;
+                                }
                                 arSceneView.getScene().getCamera().addChild(arrow);
+                                if(oldNode!=null){
+                                    arSceneView.getScene().getCamera().removeChild(oldNode);
+                                }
+                                oldNode = arrow;
                                 //arrow.setParent(anchorNode);
                                 arrow.setRenderable(modelRenderable);
-                                placed = true; //to place the arrow just once.
+//                                placed = true; //to place the arrow just once.
                             }
 
                             if (locationScene != null) {
