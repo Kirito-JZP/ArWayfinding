@@ -75,8 +75,11 @@ public class ArActivity extends AppCompatActivity implements SensorEventListener
     private LocationScene locationScene;
     private ActivityArBinding binding;
     private ArrayList<LocationDto> list;
+    //newlist for route dots
     private ArrayList<LatLng> newList;
     private LocationDto destination;
+    //address from map search
+    private String targetAddress;
     private ImageView arReturnBtn;
     private static boolean placed = false;
     private Location lastPosition;
@@ -99,6 +102,9 @@ public class ArActivity extends AppCompatActivity implements SensorEventListener
 
         arSceneView = findViewById(R.id.ar_scene_view);
         arReturnBtn = findViewById(R.id.arReturnBtn);
+        //transport values
+        Intent intentNavi = this.getIntent();
+        targetAddress = intentNavi.getStringExtra("targetLoc");
 
         CompletableFuture<ViewRenderable> layout = ViewRenderable.builder().setView(this, R.layout.activity_ar_label).build();
 

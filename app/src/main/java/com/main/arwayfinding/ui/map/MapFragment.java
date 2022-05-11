@@ -15,6 +15,7 @@ import android.graphics.BitmapFactory;
 import android.location.Location;
 import android.os.Bundle;
 import android.os.Handler;
+import android.os.Parcelable;
 import android.util.Pair;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -110,9 +111,11 @@ public class MapFragment extends Fragment implements OnMapReadyCallback {
     // Dto
     private LocationDto currentLocDto;
     private LocationDto startLocDto;
+    //targetLocDto判断非空 传值
     private LocationDto targetLocDto;
     private RouteDto currentRouteDto;
     private List<RouteDto> possibleRoutes;
+    private List<com.google.maps.model.LatLng> waypoints;
 
     // Logic
     private TrackerLogic trackerLogic;
@@ -145,6 +148,9 @@ public class MapFragment extends Fragment implements OnMapReadyCallback {
             @Override
             public void onClick(View view) {
                 Intent intent = new Intent(getActivity(), ArActivity.class);
+                if(targetLocDto!= null){
+                    intent.putExtra("targetLoc",targetLocDto.getName());
+                }
                 startActivity(intent);
             }
         });
@@ -188,8 +194,7 @@ public class MapFragment extends Fragment implements OnMapReadyCallback {
                         destTxt.setText("");
                     }
                 }
-                List<com.google.maps.model.LatLng> waypoints =
-                        NavigationUtils.getLatLngFromWaypoints(currentRouteDto);
+                waypoints = NavigationUtils.getLatLngFromWaypoints(currentRouteDto);
                 if (startLocDto != null && targetLocDto != null) {
                     parseRouteData(NavigationUtils.findRoute(startLocDto, targetLocDto, mode, waypoints));
                 }
@@ -293,18 +298,6 @@ public class MapFragment extends Fragment implements OnMapReadyCallback {
                         @Override
                         public void onClick(View view) {
                             trackerLogic.requestLastLocation(MapFragment.this::resetCurrentPosition);
-
-                            // find routes if is navigating
-//                                if (navigationLogic.isNavigating()) {
-//                                    deptPlacesListView.setVisibility(View.INVISIBLE);
-//                                    List<com.google.maps.model.LatLng> waypoints =
-//                                            NavigationUtils.getLatLngFromWaypoints
-//                                            (currentRouteDto);
-//                                    if (startLocDto != null && targetLocDto != null) {
-//                                        parseRouteData(NavigationUtils.findRoute(startLocDto,
-//                                        targetLocDto, mode, waypoints));
-//                                    }
-//                                }
                         }
                     });
                 } else {
@@ -325,8 +318,7 @@ public class MapFragment extends Fragment implements OnMapReadyCallback {
                 LatLng latlng = queryLatLng(targetLocDto.getGmPlaceID());
                 targetLocDto.setLatitude(latlng.latitude);
                 targetLocDto.setLongitude(latlng.longitude);
-                List<com.google.maps.model.LatLng> waypoints =
-                        NavigationUtils.getLatLngFromWaypoints(currentRouteDto);
+                waypoints = NavigationUtils.getLatLngFromWaypoints(currentRouteDto);
                 if (startLocDto != null && targetLocDto != null) {
                     parseRouteData(NavigationUtils.findRoute(startLocDto, targetLocDto, mode,
                     waypoints));
@@ -439,8 +431,7 @@ public class MapFragment extends Fragment implements OnMapReadyCallback {
                 public void onClick(View v) {
                     startLocDto = location;
                     deptTxt.setText(startLocDto.getName());
-                    List<com.google.maps.model.LatLng> waypoints =
-                            NavigationUtils.getLatLngFromWaypoints(currentRouteDto);
+                    waypoints = NavigationUtils.getLatLngFromWaypoints(currentRouteDto);
                     if (startLocDto != null && targetLocDto != null) {
                         parseRouteData(NavigationUtils.findRoute(startLocDto, targetLocDto, mode,
                                 waypoints));
@@ -453,8 +444,7 @@ public class MapFragment extends Fragment implements OnMapReadyCallback {
                 public void onClick(View view) {
                     targetLocDto = location;
                     destTxt.setText(targetLocDto.getName());
-                    List<com.google.maps.model.LatLng> waypoints =
-                            NavigationUtils.getLatLngFromWaypoints(currentRouteDto);
+                    waypoints = NavigationUtils.getLatLngFromWaypoints(currentRouteDto);
                     if (startLocDto != null && targetLocDto != null) {
                         parseRouteData(NavigationUtils.findRoute(startLocDto, targetLocDto, mode,
                                 waypoints));
