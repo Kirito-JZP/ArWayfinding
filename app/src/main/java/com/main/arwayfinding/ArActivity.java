@@ -130,7 +130,7 @@ public class ArActivity extends AppCompatActivity implements SensorEventListener
                                 locationScene = new LocationScene(this, this, arSceneView);
                                 ArActivity thisActivity = this;
                                 GPSTrackerLogic trackerLogic = new GPSTrackerLogic(thisActivity);
-                                Location location = trackerLogic.getLocation(thisActivity);
+                                Location location = trackerLogic.getLocation();
                                 list = PlaceUtils.getNearby(location);
 
                                 // Now lets create our location markers.

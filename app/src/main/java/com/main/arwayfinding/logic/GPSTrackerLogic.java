@@ -1,6 +1,7 @@
 package com.main.arwayfinding.logic;
 
 import android.Manifest;
+import android.app.Activity;
 import android.app.AlertDialog;
 import android.app.Service;
 import android.content.Context;
@@ -60,7 +61,7 @@ public class GPSTrackerLogic extends Service implements LocationListener {
      *
      * @return location
      */
-    public Location getLocation(FragmentActivity activity) {
+    public Location getLocation() {
         try {
             locationManager = (LocationManager) context.getSystemService(LOCATION_SERVICE);
 
@@ -69,11 +70,11 @@ public class GPSTrackerLogic extends Service implements LocationListener {
             // Get Network condition
             isNetworkEnabled = locationManager.isProviderEnabled(LocationManager.NETWORK_PROVIDER);
 
-            if (ActivityCompat.checkSelfPermission(activity, Manifest.permission.ACCESS_FINE_LOCATION)
+            if (ActivityCompat.checkSelfPermission(context, Manifest.permission.ACCESS_FINE_LOCATION)
                     != PackageManager.PERMISSION_GRANTED
-                    && ActivityCompat.checkSelfPermission(activity, Manifest.permission.ACCESS_COARSE_LOCATION)
+                    && ActivityCompat.checkSelfPermission(context, Manifest.permission.ACCESS_COARSE_LOCATION)
                     != PackageManager.PERMISSION_GRANTED) {
-                askForLocationPermissions(activity);
+                askForLocationPermissions();
             }
 
             if (isNetworkEnabled) {
@@ -120,20 +121,19 @@ public class GPSTrackerLogic extends Service implements LocationListener {
     /**
      * Function to get permission in real time
      *
-     * @param activity
      */
-    private void askForLocationPermissions(FragmentActivity activity) {
+    private void askForLocationPermissions() {
 
         // Should we show an explanation?
-        if (ActivityCompat.shouldShowRequestPermissionRationale(activity,
+        if (ActivityCompat.shouldShowRequestPermissionRationale((Activity) context,
                 Manifest.permission.ACCESS_FINE_LOCATION)) {
 
-            new AlertDialog.Builder(activity)
+            new AlertDialog.Builder((Activity) context)
                     .setTitle("Location permessions needed")
                     .setMessage("you need to allow this permission!")
                     .setPositiveButton("Sure", new DialogInterface.OnClickListener() {
                         public void onClick(DialogInterface dialog, int which) {
-                            ActivityCompat.requestPermissions(activity,
+                            ActivityCompat.requestPermissions((Activity) context,
                                     new String[]{Manifest.permission.ACCESS_FINE_LOCATION},
                                     LOCATION_PERMISSION_REQUEST_CODE);
                         }
@@ -152,7 +152,7 @@ public class GPSTrackerLogic extends Service implements LocationListener {
         } else {
 
             // No explanation needed, we can request the permission.
-            ActivityCompat.requestPermissions(activity,
+            ActivityCompat.requestPermissions((Activity) context,
                     new String[]{Manifest.permission.ACCESS_FINE_LOCATION},
                     LOCATION_PERMISSION_REQUEST_CODE);
 
