@@ -1,19 +1,32 @@
 package com.main.arwayfinding.utility;
 
+import static com.main.arwayfinding.utility.StaticStringUtils.NULL_STRING;
+
 import android.location.Location;
 
 import com.google.android.gms.maps.GoogleMap;
+import com.google.android.gms.maps.model.LatLng;
+import com.google.maps.GeocodingApiRequest;
 import com.google.maps.NearbySearchRequest;
 import com.google.maps.PlaceAutocompleteRequest;
 import com.google.maps.PlacesApi;
+import com.google.maps.RoadsApi;
 import com.google.maps.errors.ApiException;
+import com.google.maps.model.AddressComponent;
+import com.google.maps.model.GeocodingResult;
+import com.google.maps.model.LocationType;
+import com.google.maps.model.PlaceDetails;
 import com.google.maps.model.PlacesSearchResponse;
 import com.google.maps.model.PlacesSearchResult;
+import com.google.maps.model.SnappedPoint;
 import com.main.arwayfinding.ArWayfindingApp;
 import com.main.arwayfinding.dto.LocationDto;
 
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
+import java.util.stream.Collectors;
 
 /**
  * Class for location information management.
@@ -31,60 +44,60 @@ public class PlaceUtils {
     }
 
     private static PlaceAutocompleteRequest.SessionToken autocompleteSessionToken;
-//    private static boolean needNewSession = true;
+    private static boolean needNewSession = true;
 
-//    public static LocationDto findLocationGeoMsg(LatLng latLng) {
-//        LocationDto result = new LocationDto();
-//        try {
-//            GeocodingResult[] results = reverseGeocode(latLng).await();
-//            if (results.length > 0) {
-//                String placeId = results[0].placeId;
-//                PlaceDetails details = PlacesApi.placeDetails(
-//                        ArWayfindingApp.getGeoApiContext(), placeId
-//                ).await();
-//                List<AddressComponent> comps = Arrays.stream(details.addressComponents)
-//                        .filter(comp -> Arrays.stream(comp.types)
-//                                .anyMatch(t -> t.toString().equals("administrative_area_level_1"))
-//                        ).collect(Collectors.toList());
-//                String city = comps.isEmpty() ? NULL_STRING : comps.get(0).longName;
-//                comps = Arrays.stream(details.addressComponents)
-//                        .filter(comp -> Arrays.stream(comp.types)
-//                                .anyMatch(t -> t.toString().equals("country")))
-//                        .collect(Collectors.toList());
-//                String country = comps.isEmpty() ? NULL_STRING : comps.get(0).longName;
-//                comps = Arrays.stream(details.addressComponents)
-//                        .filter(comp -> Arrays.stream(comp.types)
-//                                .anyMatch(t -> t.toString().equals("postal_code")))
-//                        .collect(Collectors.toList());
-//                String postalCode = comps.isEmpty() ? NULL_STRING : comps.get(0).longName;
-//                String imageUrl = (details.photos != null && details.photos.length != 0) ?
-//                        "https://maps.googleapis.com/maps/api/place/photo?photo_reference="
-//                                + details.photos[0].photoReference
-//                                + "&maxheight=500&maxwidth=500&key="
-//                                + WayfindingApp.getKey()
-//                        : NULL_STRING;
-//                result.setName(details.name);
-//                result.setAddress(details.formattedAddress);
-//                result.setLatitude(details.geometry.location.lat);
-//                result.setLongitude(details.geometry.location.lng);
-//                result.setCity(city);
-//                result.setCountry(country);
-//                result.setPostalCode(postalCode);
-//                result.setGmImgUrl(imageUrl);
-//                result.setGmPlaceID(details.placeId);
-//            }
-//        } catch (IOException | InterruptedException | ApiException e) {
-//            e.printStackTrace();
-//        }
-//        return result;
-//    }
-//
-//    public static GeocodingApiRequest reverseGeocode(LatLng latlng) {
-//        GeocodingApiRequest request = new GeocodingApiRequest(WayfindingApp.getGeoApiContext());
-//        request.locationType(LocationType.ROOFTOP);
-//        request.latlng(LatLngConverterUtils.convert(latlng));
-//        return request;
-//    }
+    public static LocationDto findLocationGeoMsg(LatLng latLng) {
+        LocationDto result = new LocationDto();
+        try {
+            GeocodingResult[] results = reverseGeocode(latLng).await();
+            if (results.length > 0) {
+                String placeId = results[0].placeId;
+                PlaceDetails details = PlacesApi.placeDetails(
+                        ArWayfindingApp.getGeoApiContext(), placeId
+                ).await();
+                List<AddressComponent> comps = Arrays.stream(details.addressComponents)
+                        .filter(comp -> Arrays.stream(comp.types)
+                                .anyMatch(t -> t.toString().equals("administrative_area_level_1"))
+                        ).collect(Collectors.toList());
+                String city = comps.isEmpty() ? NULL_STRING : comps.get(0).longName;
+                comps = Arrays.stream(details.addressComponents)
+                        .filter(comp -> Arrays.stream(comp.types)
+                                .anyMatch(t -> t.toString().equals("country")))
+                        .collect(Collectors.toList());
+                String country = comps.isEmpty() ? NULL_STRING : comps.get(0).longName;
+                comps = Arrays.stream(details.addressComponents)
+                        .filter(comp -> Arrays.stream(comp.types)
+                                .anyMatch(t -> t.toString().equals("postal_code")))
+                        .collect(Collectors.toList());
+                String postalCode = comps.isEmpty() ? NULL_STRING : comps.get(0).longName;
+                String imageUrl = (details.photos != null && details.photos.length != 0) ?
+                        "https://maps.googleapis.com/maps/api/place/photo?photo_reference="
+                                + details.photos[0].photoReference
+                                + "&maxheight=500&maxwidth=500&key="
+                                + ArWayfindingApp.getKey()
+                        : NULL_STRING;
+                result.setName(details.name);
+                result.setAddress(details.formattedAddress);
+                result.setLatitude(details.geometry.location.lat);
+                result.setLongitude(details.geometry.location.lng);
+                result.setCity(city);
+                result.setCountry(country);
+                result.setPostalCode(postalCode);
+                result.setGmImgUrl(imageUrl);
+                result.setGmPlaceID(details.placeId);
+            }
+        } catch (IOException | InterruptedException | ApiException e) {
+            e.printStackTrace();
+        }
+        return result;
+    }
+
+    public static GeocodingApiRequest reverseGeocode(LatLng latlng) {
+        GeocodingApiRequest request = new GeocodingApiRequest(ArWayfindingApp.getGeoApiContext());
+        request.locationType(LocationType.ROOFTOP);
+        request.latlng(LatLngUtils.convert(latlng));
+        return request;
+    }
 //
 //    public static List<LocationDto> autocompletePlaces(String keyword, LatLng location) {
 //        Log.d("[TEST]", "Here!");
@@ -132,52 +145,52 @@ public class PlaceUtils {
 //        }
 //    }
 //
-//    public static LocationDto queryDetail(String placeID) {
-//        // end the autocomplete session otherwise it produces extra cost
-//        if (!needNewSession) {
-//            needNewSession = true;
-//            autocompleteSessionToken = null;
-//        }
-//        try {
-//            PlaceDetails details = PlacesApi.placeDetails(WayfindingApp.getGeoApiContext(),
-//                    placeID).await();
-//            LocationDto location = new LocationDto();
-//            List<AddressComponent> comps = Arrays.stream(details.addressComponents)
-//                    .filter(comp -> Arrays.stream(comp.types)
-//                            .anyMatch(t -> t.toString().equals("administrative_area_level_1"))
-//                    ).collect(Collectors.toList());
-//            String city = comps.isEmpty() ? NULL_STRING : comps.get(0).longName;
-//            comps = Arrays.stream(details.addressComponents)
-//                    .filter(comp -> Arrays.stream(comp.types)
-//                            .anyMatch(t -> t.toString().equals("country")))
-//                    .collect(Collectors.toList());
-//            String country = comps.isEmpty() ? NULL_STRING : comps.get(0).longName;
-//            comps = Arrays.stream(details.addressComponents)
-//                    .filter(comp -> Arrays.stream(comp.types)
-//                            .anyMatch(t -> t.toString().equals("postal_code")))
-//                    .collect(Collectors.toList());
-//            String postalCode = comps.isEmpty() ? NULL_STRING : comps.get(0).longName;
-//            String imageUrl = (details.photos != null && details.photos.length != 0) ?
-//                    "https://maps.googleapis.com/maps/api/place/photo?photo_reference="
-//                            + details.photos[0].photoReference
-//                            + "&maxheight=500&maxwidth=500&key="
-//                            + WayfindingApp.getKey()
-//                    : NULL_STRING;
-//            location.setName(details.name);
-//            location.setAddress(details.formattedAddress);
-//            location.setLatitude(details.geometry.location.lat);
-//            location.setLongitude(details.geometry.location.lng);
-//            location.setCity(city);
-//            location.setCountry(country);
-//            location.setPostalCode(postalCode);
-//            location.setGmImgUrl(imageUrl);
-//            location.setGmPlaceID(details.placeId);
-//            return location;
-//        } catch (ApiException | InterruptedException | IOException e) {
-//            e.printStackTrace();
-//            return null;
-//        }
-//    }
+    public static LocationDto queryDetail(String placeID) {
+        // end the autocomplete session otherwise it produces extra cost
+        if (!needNewSession) {
+            needNewSession = true;
+            autocompleteSessionToken = null;
+        }
+        try {
+            PlaceDetails details = PlacesApi.placeDetails(ArWayfindingApp.getGeoApiContext(),
+                    placeID).await();
+            LocationDto location = new LocationDto();
+            List<AddressComponent> comps = Arrays.stream(details.addressComponents)
+                    .filter(comp -> Arrays.stream(comp.types)
+                            .anyMatch(t -> t.toString().equals("administrative_area_level_1"))
+                    ).collect(Collectors.toList());
+            String city = comps.isEmpty() ? NULL_STRING : comps.get(0).longName;
+            comps = Arrays.stream(details.addressComponents)
+                    .filter(comp -> Arrays.stream(comp.types)
+                            .anyMatch(t -> t.toString().equals("country")))
+                    .collect(Collectors.toList());
+            String country = comps.isEmpty() ? NULL_STRING : comps.get(0).longName;
+            comps = Arrays.stream(details.addressComponents)
+                    .filter(comp -> Arrays.stream(comp.types)
+                            .anyMatch(t -> t.toString().equals("postal_code")))
+                    .collect(Collectors.toList());
+            String postalCode = comps.isEmpty() ? NULL_STRING : comps.get(0).longName;
+            String imageUrl = (details.photos != null && details.photos.length != 0) ?
+                    "https://maps.googleapis.com/maps/api/place/photo?photo_reference="
+                            + details.photos[0].photoReference
+                            + "&maxheight=500&maxwidth=500&key="
+                            + ArWayfindingApp.getKey()
+                    : NULL_STRING;
+            location.setName(details.name);
+            location.setAddress(details.formattedAddress);
+            location.setLatitude(details.geometry.location.lat);
+            location.setLongitude(details.geometry.location.lng);
+            location.setCity(city);
+            location.setCountry(country);
+            location.setPostalCode(postalCode);
+            location.setGmImgUrl(imageUrl);
+            location.setGmPlaceID(details.placeId);
+            return location;
+        } catch (ApiException | InterruptedException | IOException e) {
+            e.printStackTrace();
+            return null;
+        }
+    }
 
     public static ArrayList<LocationDto> getNearby(Location location) {
         ArrayList<LocationDto> rtn = new ArrayList<>();
@@ -206,14 +219,14 @@ public class PlaceUtils {
         return rtn;
     }
 
-//    public static List<SnappedPoint> nearestRoads(List<LatLng> coordinates) {
-//        try {
-//            SnappedPoint[] points = RoadsApi.nearestRoads(WayfindingApp.getGeoApiContext(),
-//                    LatLngConverterUtils.convertGMS2Map(coordinates).toArray(new com.google.maps.model.LatLng[coordinates.size()])).await();
-//            return Arrays.asList(points);
-//        } catch (ApiException | InterruptedException | IOException e) {
-//            e.printStackTrace();
-//            return null;
-//        }
-//    }
+    public static List<SnappedPoint> nearestRoads(List<LatLng> coordinates) {
+        try {
+            SnappedPoint[] points = RoadsApi.nearestRoads(ArWayfindingApp.getGeoApiContext(),
+                    LatLngUtils.convertGMS2Map(coordinates).toArray(new com.google.maps.model.LatLng[coordinates.size()])).await();
+            return Arrays.asList(points);
+        } catch (ApiException | InterruptedException | IOException e) {
+            e.printStackTrace();
+            return null;
+        }
+    }
 }
