@@ -3,6 +3,7 @@ package com.main.arwayfinding.utility;
 import static com.main.arwayfinding.utility.StaticStringUtils.NULL_STRING;
 
 import android.location.Location;
+import android.util.Log;
 
 import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.model.LatLng;
@@ -13,6 +14,8 @@ import com.google.maps.PlacesApi;
 import com.google.maps.RoadsApi;
 import com.google.maps.errors.ApiException;
 import com.google.maps.model.AddressComponent;
+import com.google.maps.model.AutocompletePrediction;
+import com.google.maps.model.ComponentFilter;
 import com.google.maps.model.GeocodingResult;
 import com.google.maps.model.LocationType;
 import com.google.maps.model.PlaceDetails;
@@ -25,6 +28,7 @@ import com.main.arwayfinding.dto.LocationDto;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Comparator;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -98,53 +102,53 @@ public class PlaceUtils {
         request.latlng(LatLngUtils.convert(latlng));
         return request;
     }
-//
-//    public static List<LocationDto> autocompletePlaces(String keyword, LatLng location) {
-//        Log.d("[TEST]", "Here!");
-//        List<LocationDto> locations = new ArrayList<>();
-//        try {
-//            if (needNewSession) {
-//                autocompleteSessionToken = new PlaceAutocompleteRequest.SessionToken();
-//                needNewSession = false;
-//            }
-//            PlaceAutocompleteRequest request =
-//                    PlacesApi.placeAutocomplete(WayfindingApp.getGeoApiContext(), keyword,
-//                            autocompleteSessionToken);
-//            request.components(ComponentFilter.country("ie"))
-//                    .origin(LatLngConverterUtils.convert(location))
-//                    .location(LatLngConverterUtils.convert(location));
-//            List<AutocompletePrediction> predictions = Arrays.asList(request.await());
-//            Comparator<AutocompletePrediction> compareByDistance =
-//                    Comparator.comparingInt(p -> p.distanceMeters != null ? p.distanceMeters : 0);  // some predictions have no distance data, in such cases, use 0 for comparison
-//            Comparator<AutocompletePrediction> compareByMatchedLength =
-//                    Comparator.comparingInt(p -> p.matchedSubstrings[0].length);
-//            predictions.sort(compareByMatchedLength.thenComparing(compareByDistance));
-//            for (AutocompletePrediction prediction : predictions) {
-//                LocationDto loc = new LocationDto();
-//                loc.setGmPlaceID(prediction.placeId);
-//                loc.setName(prediction.structuredFormatting.mainText);
-//                loc.setAddress(prediction.description);
-//                locations.add(loc);
-//            }
-//            return locations;
-//        } catch (Exception e) {
-//            e.printStackTrace();
-//            return locations;
-//        }
-//    }
-//
-//    public static LatLng queryLatLng(String placeID) {
-//        try {
-//            GeocodingApiRequest request = new GeocodingApiRequest(WayfindingApp.getGeoApiContext());
-//            request.place(placeID);
-//            GeocodingResult[] results = request.await();
-//            return LatLngConverterUtils.convert(results[0].geometry.location);
-//        } catch (ApiException | InterruptedException | IOException e) {
-//            e.printStackTrace();
-//            return null;
-//        }
-//    }
-//
+
+    public static List<LocationDto> autocompletePlaces(String keyword, LatLng location) {
+        Log.d("[TEST]", "Here!");
+        List<LocationDto> locations = new ArrayList<>();
+        try {
+            if (needNewSession) {
+                autocompleteSessionToken = new PlaceAutocompleteRequest.SessionToken();
+                needNewSession = false;
+            }
+            PlaceAutocompleteRequest request =
+                    PlacesApi.placeAutocomplete(ArWayfindingApp.getGeoApiContext(), keyword,
+                            autocompleteSessionToken);
+            request.components(ComponentFilter.country("ie"))
+                    .origin(LatLngUtils.convert(location))
+                    .location(LatLngUtils.convert(location));
+            List<AutocompletePrediction> predictions = Arrays.asList(request.await());
+            Comparator<AutocompletePrediction> compareByDistance =
+                    Comparator.comparingInt(p -> p.distanceMeters != null ? p.distanceMeters : 0);  // some predictions have no distance data, in such cases, use 0 for comparison
+            Comparator<AutocompletePrediction> compareByMatchedLength =
+                    Comparator.comparingInt(p -> p.matchedSubstrings[0].length);
+            predictions.sort(compareByMatchedLength.thenComparing(compareByDistance));
+            for (AutocompletePrediction prediction : predictions) {
+                LocationDto loc = new LocationDto();
+                loc.setGmPlaceID(prediction.placeId);
+                loc.setName(prediction.structuredFormatting.mainText);
+                loc.setAddress(prediction.description);
+                locations.add(loc);
+            }
+            return locations;
+        } catch (Exception e) {
+            e.printStackTrace();
+            return locations;
+        }
+    }
+
+    public static LatLng queryLatLng(String placeID) {
+        try {
+            GeocodingApiRequest request = new GeocodingApiRequest(ArWayfindingApp.getGeoApiContext());
+            request.place(placeID);
+            GeocodingResult[] results = request.await();
+            return LatLngUtils.convert(results[0].geometry.location);
+        } catch (ApiException | InterruptedException | IOException e) {
+            e.printStackTrace();
+            return null;
+        }
+    }
+
     public static LocationDto queryDetail(String placeID) {
         // end the autocomplete session otherwise it produces extra cost
         if (!needNewSession) {

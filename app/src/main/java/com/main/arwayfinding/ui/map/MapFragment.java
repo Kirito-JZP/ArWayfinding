@@ -1,8 +1,12 @@
 package com.main.arwayfinding.ui.map;
 
+import static com.main.arwayfinding.utility.NoticeUtils.createToast;
 import static com.main.arwayfinding.utility.PlaceUtils.findLocationGeoMsg;
 import static com.main.arwayfinding.utility.PlaceUtils.queryDetail;
-import static com.main.arwayfinding.utility.StaticStringUtils.*;
+import static com.main.arwayfinding.utility.PlaceUtils.queryLatLng;
+import static com.main.arwayfinding.utility.StaticStringUtils.ADD_SUCCESS_MSG;
+import static com.main.arwayfinding.utility.StaticStringUtils.NO_AVAILABLE_ROUTE;
+import static com.main.arwayfinding.utility.StaticStringUtils.NO_INPUT_MSG;
 
 import android.annotation.SuppressLint;
 import android.content.Intent;
@@ -35,6 +39,7 @@ import com.google.android.gms.maps.model.Marker;
 import com.google.android.gms.maps.model.MarkerOptions;
 import com.google.android.gms.maps.model.PointOfInterest;
 import com.google.android.material.bottomsheet.BottomSheetBehavior;
+import com.google.firebase.auth.FirebaseAuth;
 import com.google.maps.model.TravelMode;
 import com.main.arwayfinding.ArActivity;
 import com.main.arwayfinding.R;
@@ -42,9 +47,9 @@ import com.main.arwayfinding.databinding.FragmentMapBinding;
 import com.main.arwayfinding.dto.LocationDto;
 import com.main.arwayfinding.dto.RouteDto;
 import com.main.arwayfinding.logic.TrackerLogic;
+import com.main.arwayfinding.logic.db.LocationDBLogic;
 import com.main.arwayfinding.utility.LatLngUtils;
 import com.main.arwayfinding.utility.NavigationUtils;
-import com.main.arwayfinding.utility.NoticeUtils;
 import com.main.arwayfinding.utility.PlaceUtils;
 
 import org.apache.commons.lang3.StringUtils;
@@ -143,6 +148,72 @@ public class MapFragment extends Fragment implements OnMapReadyCallback {
                 startActivity(intent);
             }
         });
+
+        addBtn.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                if (FirebaseAuth.getInstance().getCurrentUser() != null) {
+                    if (targetLocDto != null && StringUtils.isNotEmpty(targetLocDto.getName())) {
+                        targetLocDto.setDate(new Date());
+                        new LocationDBLogic().insert(targetLocDto);
+                        createToast(getContext(), ADD_SUCCESS_MSG);
+                    } else {
+                        createToast(getContext(), NO_INPUT_MSG);
+                    }
+                } else {
+                    createToast(getContext(), "Cannot add it without logging in!");
+                }
+            }
+        });
+
+        exchangeBtn.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                // Exchange the departure and the destination
+                if (startLocDto != null || targetLocDto != null) {
+                    // Exchange content in dto
+                    LocationDto temp = startLocDto;
+                    startLocDto = targetLocDto;
+                    targetLocDto = temp;
+
+                    // Exchange message in TextView
+                    if (startLocDto != null) {
+                        deptTxt.setText(startLocDto.getName());
+                    } else {
+                        deptTxt.setText("");
+                    }
+                    if (targetLocDto != null) {
+                        destTxt.setText(targetLocDto.getName());
+                    } else {
+                        destTxt.setText("");
+                    }
+                }
+                List<com.google.maps.model.LatLng> waypoints =
+                        NavigationUtils.getLatLngFromWaypoints(currentRouteDto);
+                if (startLocDto != null && targetLocDto != null) {
+                    parseRouteData(NavigationUtils.findRoute(startLocDto, targetLocDto, mode, waypoints));
+                }
+            }
+        });
+
+        deptTxtClearBtn.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                startLocDto = new LocationDto();
+                //deptPlacesListView.setVisibility(View.INVISIBLE);
+                deptTxt.setText("");
+            }
+        });
+
+        destTxtClearBtn.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                targetLocDto = new LocationDto();
+                //destPlacesListView.setVisibility(View.INVISIBLE);
+                destTxt.setText("");
+            }
+        });
+
     }
 
 
@@ -248,18 +319,18 @@ public class MapFragment extends Fragment implements OnMapReadyCallback {
             String keyword = arguments.getString("name");
             destTxt.setText(keyword);
 
-//                targetLocDto = PlaceUtils.autocompletePlaces(keyword,
-//                        startLocDto != null ? LatLngConverterUtils.getLatLngFromDto(startLocDto)
-//                                : LatLngConverterUtils.getLatLngFromDto(currentLocDto)).get(0);
-//                LatLng latlng = queryLatLng(targetLocDto.getGmPlaceID());
-//                targetLocDto.setLatitude(latlng.latitude);
-//                targetLocDto.setLongitude(latlng.longitude);
-//                List<com.google.maps.model.LatLng> waypoints =
-//                        NavigationUtils.getLatLngFromWaypoints(currentRouteDto);
-//                if (startLocDto != null && targetLocDto != null) {
-//                    parseRouteData(NavigationUtils.findRoute(startLocDto, targetLocDto, mode,
-//                    waypoints));
-//                }
+                targetLocDto = PlaceUtils.autocompletePlaces(keyword,
+                        startLocDto != null ? LatLngUtils.getLatLngFromDto(startLocDto)
+                                : LatLngUtils.getLatLngFromDto(currentLocDto)).get(0);
+                LatLng latlng = queryLatLng(targetLocDto.getGmPlaceID());
+                targetLocDto.setLatitude(latlng.latitude);
+                targetLocDto.setLongitude(latlng.longitude);
+                List<com.google.maps.model.LatLng> waypoints =
+                        NavigationUtils.getLatLngFromWaypoints(currentRouteDto);
+                if (startLocDto != null && targetLocDto != null) {
+                    parseRouteData(NavigationUtils.findRoute(startLocDto, targetLocDto, mode,
+                    waypoints));
+                }
         }
     }
 
@@ -390,20 +461,6 @@ public class MapFragment extends Fragment implements OnMapReadyCallback {
                     }
                 }
             });
-            // deactivate addWaypointBtn at first and activate it once a route is selected
-//            addWaypointBtn.setOnClickListener(new View.OnClickListener() {
-//                @Override
-//                public void onClick(View view) {
-//                    navigationLogic.addWayPoint(location);
-//                    // collapse the bottom sheet
-//                    BottomSheetBehavior<FrameLayout> sheetBehavior =
-//                            BottomSheetBehavior.from(bottomSheet);
-//                    sheetBehavior.setState(BottomSheetBehavior.STATE_COLLAPSED);
-//                    // remove marker
-//                    marker.remove();
-//                }
-//            });
-            addWaypointBtn.setActivated(false);
             // re-open the bottom sheet to display a new place and set a delay of 0.1s after folding
             // the bottom sheet
             // the operation is done to avoid some cases where the bottom sheet fails to show up
@@ -454,7 +511,7 @@ public class MapFragment extends Fragment implements OnMapReadyCallback {
             NavigationUtils.updatePolylinesUI(currentRouteDto, map);
         } else {
             // no routes found
-            NoticeUtils.createToast(getContext(), NO_AVAILABLE_ROUTE);
+            createToast(getContext(), NO_AVAILABLE_ROUTE);
             map.clear();
         }
     }
