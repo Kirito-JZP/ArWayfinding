@@ -390,20 +390,6 @@ public class MapFragment extends Fragment implements OnMapReadyCallback {
                     }
                 }
             });
-            // deactivate addWaypointBtn at first and activate it once a route is selected
-//            addWaypointBtn.setOnClickListener(new View.OnClickListener() {
-//                @Override
-//                public void onClick(View view) {
-//                    navigationLogic.addWayPoint(location);
-//                    // collapse the bottom sheet
-//                    BottomSheetBehavior<FrameLayout> sheetBehavior =
-//                            BottomSheetBehavior.from(bottomSheet);
-//                    sheetBehavior.setState(BottomSheetBehavior.STATE_COLLAPSED);
-//                    // remove marker
-//                    marker.remove();
-//                }
-//            });
-            addWaypointBtn.setActivated(false);
             // re-open the bottom sheet to display a new place and set a delay of 0.1s after folding
             // the bottom sheet
             // the operation is done to avoid some cases where the bottom sheet fails to show up

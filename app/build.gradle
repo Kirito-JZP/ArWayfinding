@@ -40,6 +40,10 @@ android {
             'default',
             'sampledata/models/andy.sfa',
             'src/main/res/raw/andy')
+    sceneform.asset('sampledata/ball.obj',
+            'default',
+            'sampledata/models/ball.sfa',
+            'src/main/res/raw/ball')
 }
 
 dependencies {
