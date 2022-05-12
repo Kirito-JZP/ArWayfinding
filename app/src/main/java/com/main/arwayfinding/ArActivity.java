@@ -214,14 +214,14 @@ public class ArActivity extends AppCompatActivity implements SensorEventListener
                                     placed = true; //to place the arrow just once.
                                 } else {
                                     Node arrow = arSceneView.getScene().getCamera().getChildren().get(0);
+                                    arrow.setLocalRotation(Quaternion.eulerAngles(new Vector3(rotateDegree[1], 0.0F, -rotateDegree[2])));
+                                    Node compass = arSceneView.getScene().getCamera().getChildren().get(1);
                                     if (Math.round(Math.toDegrees(orientationAngles[1]) / 15) * 15 % 90 != 0) {
-                                        arrow.setLocalRotation(Quaternion.eulerAngles(new Vector3(
+                                        compass.setLocalRotation(Quaternion.eulerAngles(new Vector3(
                                                 Math.round(Math.toDegrees(orientationAngles[1]) / 20) * 20,
                                                 Math.round(Math.toDegrees(orientationAngles[2]) / 20) * 20,
                                                 Math.round(Math.toDegrees(orientationAngles[0]) / 20) * 20)));
                                     }
-                                    Node compass = arSceneView.getScene().getCamera().getChildren().get(1);
-                                    compass.setLocalRotation(Quaternion.eulerAngles(new Vector3(rotateDegree[1], 0.0F, -rotateDegree[2])));
                                 }
                             }
 
