@@ -201,7 +201,7 @@ public class PlaceUtils {
         try {
             NearbySearchRequest nearbySearchRequest = PlacesApi.nearbySearchQuery(ArWayfindingApp.getGeoApiContext(),
                     new com.google.maps.model.LatLng(location.getLatitude(), location.getLongitude()));
-            nearbySearchRequest.radius(100);
+            nearbySearchRequest.radius(50);
             System.out.println("=======================");
             System.out.println(ArWayfindingApp.getGeoApiContext());
             PlacesSearchResponse placesSearchResponse = nearbySearchRequest.await();
