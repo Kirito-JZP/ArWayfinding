@@ -79,6 +79,7 @@ public class ArActivity extends AppCompatActivity implements SensorEventListener
     private ModelRenderable andyRenderable;
     private ModelRenderable arrowRenderable;
     private ModelRenderable compassRenderable;
+    private ModelRenderable compassWhiteRenderable;
     private ModelRenderable modelRenderable;
     private ViewRenderable layoutRenderable;
     private LocationScene locationScene;
@@ -123,6 +124,7 @@ public class ArActivity extends AppCompatActivity implements SensorEventListener
         CompletableFuture<ModelRenderable> arrowModel = ModelRenderable.builder().setSource(this, R.raw.arrow).build();
         // 待会导入模型后设为R.raw.compass
         CompletableFuture<ModelRenderable> compassModel = ModelRenderable.builder().setSource(this, R.raw.compass).build();
+        CompletableFuture<ModelRenderable> compassWhiteModel = ModelRenderable.builder().setSource(this, R.raw.compass_white).build();
 
         CompletableFuture.allOf(layout, andyModel).handle((notUsed, throwable) -> {
             // When build a Renderable, Sceneform loads its resources in the
@@ -138,6 +140,7 @@ public class ArActivity extends AppCompatActivity implements SensorEventListener
                 andyRenderable = andyModel.get();
                 arrowRenderable = arrowModel.get();
                 compassRenderable = compassModel.get();
+                compassWhiteRenderable = compassWhiteModel.get();
                 hasFinishedLoading = true;
             } catch (InterruptedException | ExecutionException ex) {
                 ArLocationUtils.displayError(this, "Unable to load renderables", ex);
@@ -211,6 +214,11 @@ public class ArActivity extends AppCompatActivity implements SensorEventListener
                                     arSceneView.getScene().getCamera().addChild(compass);
                                     compass.setRenderable(compassRenderable);
 
+                                    Node compassWhite = new Node();
+                                    compassWhite.setLocalPosition((new Vector3(0.15f, -0.4f, -1.0f)));
+                                    compassWhite.setLocalScale(new Vector3(0.5f, 0.5f, 0.5f));
+                                    arSceneView.getScene().getCamera().addChild(compassWhite);
+                                    compassWhite.setRenderable(compassWhiteRenderable);
                                     placed = true; //to place the arrow just once.
                                 } else {
                                     Node arrow = arSceneView.getScene().getCamera().getChildren().get(0);
@@ -221,6 +229,15 @@ public class ArActivity extends AppCompatActivity implements SensorEventListener
                                                 Math.round(Math.toDegrees(orientationAngles[1]) / 20) * 20,
                                                 Math.round(Math.toDegrees(orientationAngles[2]) / 20) * 20,
                                                 Math.round(Math.toDegrees(orientationAngles[0]) / 20) * 20)));
+
+                                    }
+                                    Node compassWhite = arSceneView.getScene().getCamera().getChildren().get(2);
+                                    if (Math.round(Math.toDegrees(orientationAngles[1]) / 15) * 15 % 90 != 0) {
+                                        compassWhite.setLocalRotation(Quaternion.eulerAngles(new Vector3(
+                                                Math.round(Math.toDegrees(orientationAngles[1]) / 20) * 20,
+                                                Math.round(Math.toDegrees(orientationAngles[2]) / 20) * 20,
+                                                180+Math.round(Math.toDegrees(orientationAngles[0]) / 20) * 20)));
+
                                     }
                                 }
                             }

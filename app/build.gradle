@@ -48,6 +48,10 @@ android {
             'default',
             'sampledata/models/compass.sfa',
             'src/main/res/raw/compass')
+    sceneform.asset('sampledata/compass_white.obj',
+            'default',
+            'sampledata/models/compass_white.sfa',
+            'src/main/res/raw/compass_white')
 }
 
 dependencies {
