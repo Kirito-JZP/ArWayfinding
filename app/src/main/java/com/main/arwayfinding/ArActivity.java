@@ -168,7 +168,7 @@ public class ArActivity extends AppCompatActivity implements SensorEventListener
                                                 LatLng latlng = queryLatLng(destination.getGmPlaceID());
                                                 destination.setLatitude(latlng.latitude);
                                                 destination.setLongitude(latlng.longitude);
-                                                renderAR(location);
+                                                renderAR_nearBy(location);
                                             }
                                         });
                                     }
@@ -472,12 +472,12 @@ public class ArActivity extends AppCompatActivity implements SensorEventListener
             // Adding the marker
             locationScene.mLocationMarkers.add(viewLocationMarker);
             // draw routine -----------
-            int count = 0;
+//            int count = 0;
             for (LatLng waypoint : waypoints) {
-                count++;
-                if(count>=6){
-                    break;
-                }
+//                count++;
+//                if(count>=6){
+//                    break;
+//                }
                 CompletableFuture<ViewRenderable> layout = ViewRenderable.builder().setView(this, R.layout.activity_ar_label).build();
                 CompletableFuture<ModelRenderable> model = ModelRenderable.builder().setSource(this, R.raw.ball).build();
                 CompletableFuture.allOf(layout, model).handle((notUsed, throwable) -> {
@@ -508,7 +508,7 @@ public class ArActivity extends AppCompatActivity implements SensorEventListener
                             Vector3 worldPosition = nodeObject.getWorldPosition();
                             worldPosition.y = -5;
                             nodeObject.setWorldPosition(worldPosition);
-                            nodeObject.setLocalScale(new Vector3(0.5f, 0.5f, 0.5f));
+                            nodeObject.setLocalScale(new Vector3(0.8f, 0.8f, 0.8f));
                         }
                     });
                     // Adding a simple location marker of a 3D model
@@ -525,7 +525,7 @@ public class ArActivity extends AppCompatActivity implements SensorEventListener
         }
     }
 
-    private void renderAR_old(Location location) {
+    private void renderAR_nearBy(Location location) {
         locationScene.deviceLocation.currentBestLocation.setLatitude(location.getLatitude());
         locationScene.deviceLocation.currentBestLocation.setLongitude(location.getLongitude());
         if (lastPosition == null) {
@@ -536,7 +536,7 @@ public class ArActivity extends AppCompatActivity implements SensorEventListener
         if (updateRequired) {
             for (LocationDto locationDto : list) {
                 CompletableFuture<ViewRenderable> layout = ViewRenderable.builder().setView(this, R.layout.activity_ar_label).build();
-                CompletableFuture<ModelRenderable> model = ModelRenderable.builder().setSource(this, R.raw.arrow).build();
+                CompletableFuture<ModelRenderable> model = ModelRenderable.builder().setSource(this, R.raw.andy).build();
                 CompletableFuture.allOf(layout, model).handle((notUsed, throwable) -> {
                     // init renderable
                     if (throwable != null) {
@@ -567,7 +567,7 @@ public class ArActivity extends AppCompatActivity implements SensorEventListener
                             // height fix
                             Node viewNode = node.getChildren().get(0);
                             Vector3 worldPosition = viewNode.getWorldPosition();
-                            worldPosition.y = 1;
+                            worldPosition.y = 0;
                             viewNode.setWorldPosition(worldPosition);
 
                             View eView = copyOfRenderable.getView();
@@ -579,7 +579,7 @@ public class ArActivity extends AppCompatActivity implements SensorEventListener
                     });
                     // Adding the marker
                     locationScene.mLocationMarkers.add(layoutLocationMarker);
-                    ModelRenderable copyOfArrowRenderable = arrowRenderable.makeCopy();
+                    ModelRenderable copyOfArrowRenderable = modelRenderable.makeCopy();
                     LocationMarker modelLocationMarker = new LocationMarker(
                             locationDto.getLongitude(),
                             locationDto.getLatitude(),
@@ -591,7 +591,7 @@ public class ArActivity extends AppCompatActivity implements SensorEventListener
                             // height fix
                             Node viewNode = node.getChildren().get(0);
                             Vector3 worldPosition = viewNode.getWorldPosition();
-                            worldPosition.y = 1;
+                            worldPosition.y = 2;
                             viewNode.setWorldPosition(worldPosition);
 
                         }
