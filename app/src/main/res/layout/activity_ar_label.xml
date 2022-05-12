@@ -1,8 +1,8 @@
 <?xml version="1.0" encoding="utf-8"?>
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools"
-    android:layout_width="80dp"
-    android:layout_height="50dp"
+    android:layout_width="70dp"
+    android:layout_height="38dp"
     android:alpha="0.83"
     android:background="@drawable/bg_white"
     android:orientation="vertical"
@@ -14,15 +14,17 @@
         android:id="@+id/loc_name"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:textSize="8sp"
+        android:layout_marginTop="4dp"
         android:textColor="#fff"
-        android:layout_marginTop="10dp"/>
+        android:textSize="5dp" />
 
     <TextView
         android:id="@+id/loc_distance"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
+        android:layout_marginBottom="2dp"
+        android:layout_marginLeft="5dp"
         android:textColor="#fff"
-        android:textSize="5sp"
-        android:layout_marginTop="5dp"/>
+        android:textSize="3dp"
+        android:layout_marginTop="3dp"/>
 </LinearLayout>

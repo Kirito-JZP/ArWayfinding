@@ -164,10 +164,12 @@ public class ArActivity extends AppCompatActivity implements SensorEventListener
                                         trackerLogic.requestLastLocation(new TrackerLogic.RequestLocationCompleteCallback() {
                                             @Override
                                             public void onRequestLocationComplete(Location location) {
-                                                destination = PlaceUtils.autocompletePlaces(destinationStr, new LatLng(location.getLatitude(), location.getLongitude())).get(0);
-                                                LatLng latlng = queryLatLng(destination.getGmPlaceID());
-                                                destination.setLatitude(latlng.latitude);
-                                                destination.setLongitude(latlng.longitude);
+                                                if(destinationStr!=null){
+                                                    destination = PlaceUtils.autocompletePlaces(destinationStr, new LatLng(location.getLatitude(), location.getLongitude())).get(0);
+                                                    LatLng latlng = queryLatLng(destination.getGmPlaceID());
+                                                    destination.setLatitude(latlng.latitude);
+                                                    destination.setLongitude(latlng.longitude);
+                                                }
                                                 renderAR_nearBy(location);
                                             }
                                         });
@@ -591,7 +593,7 @@ public class ArActivity extends AppCompatActivity implements SensorEventListener
                             // height fix
                             Node viewNode = node.getChildren().get(0);
                             Vector3 worldPosition = viewNode.getWorldPosition();
-                            worldPosition.y = 2;
+                            worldPosition.y = 1.5f;
                             viewNode.setWorldPosition(worldPosition);
 
                         }
