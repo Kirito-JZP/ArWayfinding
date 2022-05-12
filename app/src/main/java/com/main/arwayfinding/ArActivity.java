@@ -97,6 +97,7 @@ public class ArActivity extends AppCompatActivity implements SensorEventListener
     private final float[] magnetometerReading = new float[3];
     private final float[] rotationMatrix = new float[9];
     private final float[] orientationAngles = new float[3];
+    private static float[] rotateDegree = new float[3];
 
 
     @Override
@@ -196,12 +197,13 @@ public class ArActivity extends AppCompatActivity implements SensorEventListener
                                     placed = true; //to place the arrow just once.
                                 } else {
                                     Node arrow = arSceneView.getScene().getCamera().getChildren().get(0);
-                                    if (Math.round(Math.toDegrees(orientationAngles[1]) / 15) * 15 % 90 != 0) {
-                                        arrow.setLocalRotation(Quaternion.eulerAngles(new Vector3(
-                                                Math.round(Math.toDegrees(orientationAngles[1]) / 20) * 20,
-                                                Math.round(Math.toDegrees(orientationAngles[2]) / 20) * 20,
-                                                Math.round(Math.toDegrees(orientationAngles[0]) / 20) * 20)));
-                                    }
+//                                    if (Math.round(Math.toDegrees(orientationAngles[1]) / 15) * 15 % 90 != 0) {
+//                                        arrow.setLocalRotation(Quaternion.eulerAngles(new Vector3(
+//                                                Math.round(Math.toDegrees(orientationAngles[1]) / 20) * 20,
+//                                                Math.round(Math.toDegrees(orientationAngles[2]) / 20) * 20,
+//                                                Math.round(Math.toDegrees(orientationAngles[0]) / 20) * 20)));
+//                                    }
+                                    arrow.setLocalRotation(Quaternion.eulerAngles(new Vector3(rotateDegree[1], 0.0F, -rotateDegree[2])));
                                 }
                             }
 
@@ -264,6 +266,11 @@ public class ArActivity extends AppCompatActivity implements SensorEventListener
         Sensor magneticField = sensorManager.getDefaultSensor(Sensor.TYPE_MAGNETIC_FIELD);
         if (magneticField != null) {
             sensorManager.registerListener(this, magneticField,
+                    SensorManager.SENSOR_DELAY_NORMAL, SensorManager.SENSOR_DELAY_UI);
+        }
+        Sensor orientation = sensorManager.getDefaultSensor(Sensor.TYPE_ORIENTATION);
+        if (orientation != null) {
+            sensorManager.registerListener(this, orientation,
                     SensorManager.SENSOR_DELAY_NORMAL, SensorManager.SENSOR_DELAY_UI);
         }
 
@@ -379,16 +386,24 @@ public class ArActivity extends AppCompatActivity implements SensorEventListener
 
     @Override
     public void onSensorChanged(SensorEvent sensorEvent) {
-        if (sensorEvent.sensor.getType() == Sensor.TYPE_ACCELEROMETER) {
-            System.arraycopy(sensorEvent.values, 0, accelerometerReading,
-                    0, accelerometerReading.length);
-        } else if (sensorEvent.sensor.getType() == Sensor.TYPE_MAGNETIC_FIELD) {
-            System.arraycopy(sensorEvent.values, 0, magnetometerReading,
-                    0, magnetometerReading.length);
+        if(sensorEvent.sensor.getType()==Sensor.TYPE_ORIENTATION){
+            System.out.println("方位角：" + (float) (Math.round(sensorEvent.values[0] * 100)) / 100);
+            System.out.println("倾斜角：" + (float) (Math.round(sensorEvent.values[1] * 100)) / 100);
+            System.out.println("滚动角：" + (float) (Math.round(sensorEvent.values[2] * 100)) / 100);
+            rotateDegree[0] = (float) (Math.round(sensorEvent.values[0] * 100)) / 100;
+            rotateDegree[1] = (float) (Math.round(sensorEvent.values[1] * 100)) / 100;
+            rotateDegree[2] = (float) (Math.round(sensorEvent.values[2] * 100)) / 100;
+        }else{
+            if (sensorEvent.sensor.getType() == Sensor.TYPE_ACCELEROMETER) {
+                System.arraycopy(sensorEvent.values, 0, accelerometerReading,
+                        0, accelerometerReading.length);
+            } else if (sensorEvent.sensor.getType() == Sensor.TYPE_MAGNETIC_FIELD) {
+                System.arraycopy(sensorEvent.values, 0, magnetometerReading,
+                        0, magnetometerReading.length);
+            }
+            SensorManager.getRotationMatrix(rotationMatrix, null, accelerometerReading, magnetometerReading);
+            SensorManager.getOrientation(rotationMatrix, orientationAngles);
         }
-        SensorManager.getRotationMatrix(rotationMatrix, null, accelerometerReading, magnetometerReading);
-        SensorManager.getOrientation(rotationMatrix, orientationAngles);
-
     }
 
     @Override
