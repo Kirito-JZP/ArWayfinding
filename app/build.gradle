@@ -44,6 +44,10 @@ android {
             'default',
             'sampledata/models/ball.sfa',
             'src/main/res/raw/ball')
+    sceneform.asset('sampledata/compass.obj',
+            'default',
+            'sampledata/models/compass.sfa',
+            'src/main/res/raw/compass')
 }
 
 dependencies {

@@ -122,7 +122,7 @@ public class ArActivity extends AppCompatActivity implements SensorEventListener
         CompletableFuture<ModelRenderable> andyModel = ModelRenderable.builder().setSource(this, R.raw.andy).build();
         CompletableFuture<ModelRenderable> arrowModel = ModelRenderable.builder().setSource(this, R.raw.arrow).build();
         // 待会导入模型后设为R.raw.compass
-        CompletableFuture<ModelRenderable> compassModel = ModelRenderable.builder().setSource(this, R.raw.arrow).build();
+        CompletableFuture<ModelRenderable> compassModel = ModelRenderable.builder().setSource(this, R.raw.compass).build();
 
         CompletableFuture.allOf(layout, andyModel).handle((notUsed, throwable) -> {
             // When build a Renderable, Sceneform loads its resources in the
