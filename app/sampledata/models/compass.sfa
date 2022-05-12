@@ -15,10 +15,10 @@
           ],
         },
         {
-          metallic: 1,
+          metallic: 0,
         },
         {
-          roughness: 0.408248,
+          roughness: 1,
         },
         {
           opacity: null,
@@ -40,12 +40,9 @@
   },
   samplers: [
     {
-      file: 'sampledata\\compass.png',
+      file: 'sampledata\\compass.jpg',
       name: 'compass',
-      params: {
-        usage_type: 'Data',
-      },
-      pipeline_name: 'compass.png',
+      pipeline_name: 'compass.jpg',
     },
   ],
   version: '0.54:2',
