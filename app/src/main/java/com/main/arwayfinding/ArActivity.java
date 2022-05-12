@@ -78,6 +78,7 @@ public class ArActivity extends AppCompatActivity implements SensorEventListener
     private ArSceneView arSceneView;
     private ModelRenderable andyRenderable;
     private ModelRenderable arrowRenderable;
+    private ModelRenderable compassRenderable;
     private ModelRenderable modelRenderable;
     private ViewRenderable layoutRenderable;
     private LocationScene locationScene;
@@ -120,6 +121,8 @@ public class ArActivity extends AppCompatActivity implements SensorEventListener
 
         CompletableFuture<ModelRenderable> andyModel = ModelRenderable.builder().setSource(this, R.raw.andy).build();
         CompletableFuture<ModelRenderable> arrowModel = ModelRenderable.builder().setSource(this, R.raw.arrow).build();
+        // 待会导入模型后设为R.raw.compass
+        CompletableFuture<ModelRenderable> compassModel = ModelRenderable.builder().setSource(this, R.raw.arrow).build();
 
         CompletableFuture.allOf(layout, andyModel).handle((notUsed, throwable) -> {
             // When build a Renderable, Sceneform loads its resources in the
@@ -134,6 +137,7 @@ public class ArActivity extends AppCompatActivity implements SensorEventListener
                 layoutRenderable = layout.get();
                 andyRenderable = andyModel.get();
                 arrowRenderable = arrowModel.get();
+                compassRenderable = compassModel.get();
                 hasFinishedLoading = true;
             } catch (InterruptedException | ExecutionException ex) {
                 ArLocationUtils.displayError(this, "Unable to load renderables", ex);
@@ -197,9 +201,16 @@ public class ArActivity extends AppCompatActivity implements SensorEventListener
                                     arrow.setLocalScale(new Vector3(0.5f, 0.5f, 0.5f));
                                     arSceneView.getScene().getCamera().addChild(arrow);
                                     //arrow.setParent(anchorNode);
-                                    arrowRenderable.getMaterial().setFloat3("baseColorTint",
-                                            new Color(android.graphics.Color.rgb(255, 0, 0)));
+//                                    arrowRenderable.getMaterial().setFloat3("baseColorTint",
+//                                            new Color(android.graphics.Color.rgb(255, 0, 0)));
                                     arrow.setRenderable(arrowRenderable);
+                                    // Compass node.
+                                    Node compass = new Node();
+                                    compass.setLocalPosition((new Vector3(0.15f, -0.4f, -1.0f)));
+                                    compass.setLocalScale(new Vector3(0.5f, 0.5f, 0.5f));
+                                    arSceneView.getScene().getCamera().addChild(compass);
+                                    compass.setRenderable(compassRenderable);
+
                                     placed = true; //to place the arrow just once.
                                 } else {
                                     Node arrow = arSceneView.getScene().getCamera().getChildren().get(0);
