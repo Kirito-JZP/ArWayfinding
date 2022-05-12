@@ -220,7 +220,8 @@ public class ArActivity extends AppCompatActivity implements SensorEventListener
                                                 Math.round(Math.toDegrees(orientationAngles[2]) / 20) * 20,
                                                 Math.round(Math.toDegrees(orientationAngles[0]) / 20) * 20)));
                                     }
-//                                    arrow.setLocalRotation(Quaternion.eulerAngles(new Vector3(rotateDegree[1], 0.0F, -rotateDegree[2])));
+                                    Node compass = arSceneView.getScene().getCamera().getChildren().get(1);
+                                    compass.setLocalRotation(Quaternion.eulerAngles(new Vector3(rotateDegree[1], 0.0F, -rotateDegree[2])));
                                 }
                             }
 
@@ -404,9 +405,7 @@ public class ArActivity extends AppCompatActivity implements SensorEventListener
     @Override
     public void onSensorChanged(SensorEvent sensorEvent) {
         if (sensorEvent.sensor.getType() == Sensor.TYPE_ORIENTATION) {
-            System.out.println("方位角：" + (float) (Math.round(sensorEvent.values[0] * 100)) / 100);
-            System.out.println("倾斜角：" + (float) (Math.round(sensorEvent.values[1] * 100)) / 100);
-            System.out.println("滚动角：" + (float) (Math.round(sensorEvent.values[2] * 100)) / 100);
+            // 方位角,倾斜角,滚动角
             rotateDegree[0] = (float) (Math.round(sensorEvent.values[0] * 100)) / 100;
             rotateDegree[1] = (float) (Math.round(sensorEvent.values[1] * 100)) / 100;
             rotateDegree[2] = (float) (Math.round(sensorEvent.values[2] * 100)) / 100;
@@ -657,12 +656,7 @@ public class ArActivity extends AppCompatActivity implements SensorEventListener
         modelLocationMarker.setRenderEvent(new LocationNodeRender() {
             @Override
             public void render(LocationNode node) {
-                Objects.requireNonNull(node.getAnchor()).detach();
-                System.out.println(list.get(0).getLongitude() + " 8====> " + list.get(0).getLatitude());
-                System.out.println(node.getLocalPosition());
-                node.setWorldPosition(new Vector3(0, 0, 0));
-                System.out.println(node.getLocalPosition());
-                System.out.println(node.getWorldPosition());
+
             }
         });
         // Adding the marker
