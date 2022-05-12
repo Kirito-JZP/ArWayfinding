@@ -1,10 +1,12 @@
 package com.main.arwayfinding;
 
-import android.annotation.SuppressLint;
+import static com.main.arwayfinding.utility.PlaceUtils.queryLatLng;
+
 import android.content.Context;
 import android.content.Intent;
 import android.location.Location;
 import android.os.Bundle;
+import android.os.Parcelable;
 import android.view.View;
 import android.view.WindowManager;
 import android.widget.ImageView;
@@ -40,10 +42,15 @@ import com.google.maps.android.SphericalUtil;
 import com.main.arwayfinding.databinding.ActivityArBinding;
 import com.main.arwayfinding.dto.LocationDto;
 import com.main.arwayfinding.logic.GPSTrackerLogic;
+import com.main.arwayfinding.logic.TrackerLogic;
 import com.main.arwayfinding.utility.ArLocationUtils;
+import com.main.arwayfinding.utility.LatLngUtils;
+import com.main.arwayfinding.utility.NavigationUtils;
 import com.main.arwayfinding.utility.PlaceUtils;
 
+import java.io.Serializable;
 import java.util.ArrayList;
+import java.util.List;
 import java.util.Objects;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ExecutionException;
@@ -76,10 +83,9 @@ public class ArActivity extends AppCompatActivity implements SensorEventListener
     private ActivityArBinding binding;
     private ArrayList<LocationDto> list;
     //newlist for route dots
-    private ArrayList<LatLng> newList;
-    private LocationDto destination;
+    private ArrayList<LatLng> waypoints;
     //address from map search
-    private String targetAddress;
+    private String destinationStr;
     private ImageView arReturnBtn;
     private static boolean placed = false;
     private Location lastPosition;
@@ -104,7 +110,9 @@ public class ArActivity extends AppCompatActivity implements SensorEventListener
         arReturnBtn = findViewById(R.id.arReturnBtn);
         //transport values
         Intent intentNavi = this.getIntent();
-        targetAddress = intentNavi.getStringExtra("targetLoc");
+        destinationStr = intentNavi.getStringExtra("targetLoc");
+        waypoints = intentNavi.getParcelableArrayListExtra("waypoints");
+
 
         CompletableFuture<ViewRenderable> layout = ViewRenderable.builder().setView(this, R.layout.activity_ar_label).build();
 
@@ -148,9 +156,16 @@ public class ArActivity extends AppCompatActivity implements SensorEventListener
                                 locationScene.setLocationChangedEvent(new DeviceLocationChanged() {
                                     @Override
                                     public void onChange(Location arLocation) {
-                                        GPSTrackerLogic trackerLogic = new GPSTrackerLogic(thisActivity);
-                                        Location location = trackerLogic.getLocation();
-                                        renderAR(location);
+//                                        GPSTrackerLogic trackerLogic = new GPSTrackerLogic(thisActivity);
+//                                        Location location = trackerLogic.getLocation();
+//                                        renderAR(location);
+                                        TrackerLogic trackerLogic = TrackerLogic.createInstance(thisActivity);
+                                        trackerLogic.requestLastLocation(new TrackerLogic.RequestLocationCompleteCallback() {
+                                            @Override
+                                            public void onRequestLocationComplete(Location location) {
+                                                renderAR(location);
+                                            }
+                                        });
                                     }
                                 });
                             }
@@ -183,13 +198,6 @@ public class ArActivity extends AppCompatActivity implements SensorEventListener
                                                 Math.round(Math.toDegrees(orientationAngles[2]) / 20) * 20,
                                                 Math.round(Math.toDegrees(orientationAngles[0]) / 20) * 20)));
                                     }
-
-
-                                    System.out.println(
-                                            Math.round(Math.toDegrees(orientationAngles[1]) / 10) * 10 + "/n" +
-                                                    Math.round(Math.toDegrees(orientationAngles[2]) / 10) * 10 + "/n" +
-                                                    Math.round(Math.toDegrees(orientationAngles[0]) / 10) * 10 + "/n"
-                                    );
                                 }
                             }
 
@@ -399,6 +407,104 @@ public class ArActivity extends AppCompatActivity implements SensorEventListener
     private void renderAR(Location location) {
         locationScene.deviceLocation.currentBestLocation.setLatitude(location.getLatitude());
         locationScene.deviceLocation.currentBestLocation.setLongitude(location.getLongitude());
+        for (int i = 0; i < waypoints.size(); i++) {
+            float[] result = new float[3];
+            Location.distanceBetween(waypoints.get(i).latitude, waypoints.get(i).longitude, location.getLatitude(), location.getLongitude(), result);
+            if (result[0] <= 5) {
+                if (i > 0) {
+                    waypoints.subList(0, i).clear();
+                }
+                break;
+            }
+        }
+        LocationDto destination = PlaceUtils.autocompletePlaces(destinationStr, new LatLng(location.getLatitude(), location.getLongitude())).get(0);
+        LatLng latlng = queryLatLng(destination.getGmPlaceID());
+        destination.setLatitude(latlng.latitude);
+        destination.setLongitude(latlng.longitude);
+
+        if (lastPosition == null) {
+            lastPosition = location;
+            updateRequired = true;
+        }
+        if (updateRequired) {
+            // draw destination ------------
+            LocationMarker viewLocationMarker = new LocationMarker(
+                    destination.getLongitude(),
+                    destination.getLatitude(),
+                    createNode(layoutRenderable)
+            );
+            // Updates the layout with the markers distance
+            String name = destination.getName();
+            viewLocationMarker.setRenderEvent(new LocationNodeRender() {
+                @Override
+                public void render(LocationNode node) {
+                    // height fix
+                    Node nodeObject = node.getChildren().get(0);
+                    Vector3 worldPosition = nodeObject.getWorldPosition();
+                    worldPosition.y = 0;
+                    nodeObject.setWorldPosition(worldPosition);
+
+                    View eView = layoutRenderable.getView();
+                    TextView distanceTextView = eView.findViewById(R.id.loc_distance);
+                    TextView nameTextView = eView.findViewById(R.id.loc_name);
+                    nameTextView.setText(name);
+                    distanceTextView.setText(node.getDistance() + "M");
+                }
+            });
+            // Adding the marker
+            locationScene.mLocationMarkers.add(viewLocationMarker);
+            // draw routine -----------
+            for (LatLng waypoint : waypoints) {
+                CompletableFuture<ViewRenderable> layout = ViewRenderable.builder().setView(this, R.layout.activity_ar_label).build();
+                CompletableFuture<ModelRenderable> model = ModelRenderable.builder().setSource(this, R.raw.ball).build();
+                CompletableFuture.allOf(layout, model).handle((notUsed, throwable) -> {
+                    // init renderable
+                    if (throwable != null) {
+                        ArLocationUtils.displayError(this, "Unable to load renderables", throwable);
+                        return null;
+                    }
+                    try {
+                        layoutRenderable = layout.get();
+                        modelRenderable = model.get();
+                        hasFinishedLoading = true;
+                    } catch (InterruptedException | ExecutionException ex) {
+                        ArLocationUtils.displayError(this, "Unable to load renderables", ex);
+                    }
+                    //-----------------------------
+                    ModelRenderable copyOfArrowRenderable = modelRenderable.makeCopy();
+                    LocationMarker modelLocationMarker = new LocationMarker(
+                            waypoint.longitude,
+                            waypoint.latitude,
+                            createNode(copyOfArrowRenderable));
+
+                    modelLocationMarker.setRenderEvent(new LocationNodeRender() {
+                        @Override
+                        public void render(LocationNode node) {
+                            // height fix
+                            Node nodeObject = node.getChildren().get(0);
+                            Vector3 worldPosition = nodeObject.getWorldPosition();
+                            worldPosition.y = -5;
+                            nodeObject.setWorldPosition(worldPosition);
+                            nodeObject.setLocalScale(new Vector3(0.5f, 0.5f, 0.5f));
+                        }
+                    });
+                    // Adding a simple location marker of a 3D model
+                    locationScene.mLocationMarkers.add(modelLocationMarker);
+                    return null;
+                });
+            }
+            updateRequired = false;
+        }
+        if (location.distanceTo(lastPosition) >= 15) {
+            lastPosition = location;
+            locationScene.clearMarkers();
+            updateRequired = true;
+        }
+    }
+
+    private void renderAR_old(Location location) {
+        locationScene.deviceLocation.currentBestLocation.setLatitude(location.getLatitude());
+        locationScene.deviceLocation.currentBestLocation.setLongitude(location.getLongitude());
         if (lastPosition == null) {
             lastPosition = location;
             list = PlaceUtils.getNearby(location);
@@ -445,7 +551,6 @@ public class ArActivity extends AppCompatActivity implements SensorEventListener
                             TextView distanceTextView = eView.findViewById(R.id.loc_distance);
                             TextView nameTextView = eView.findViewById(R.id.loc_name);
                             nameTextView.setText(name);
-                            System.out.println(name+"===666===");
                             distanceTextView.setText(node.getDistance() + "M");
                         }
                     });

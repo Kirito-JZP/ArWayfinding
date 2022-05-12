@@ -57,6 +57,7 @@ import org.apache.commons.lang3.StringUtils;
 
 import java.io.InputStream;
 import java.net.URL;
+import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 
@@ -148,8 +149,10 @@ public class MapFragment extends Fragment implements OnMapReadyCallback {
             @Override
             public void onClick(View view) {
                 Intent intent = new Intent(getActivity(), ArActivity.class);
-                if(targetLocDto!= null){
-                    intent.putExtra("targetLoc",targetLocDto.getName());
+                if (targetLocDto != null) {
+                    List<LatLng> points = currentRouteDto.getSteps().get(0).getOption().getPoints();
+                    intent.putExtra("targetLoc", targetLocDto.getName());
+                    intent.putParcelableArrayListExtra("waypoints", (ArrayList<? extends Parcelable>) points);
                 }
                 startActivity(intent);
             }
@@ -218,7 +221,6 @@ public class MapFragment extends Fragment implements OnMapReadyCallback {
                 destTxt.setText("");
             }
         });
-
     }
 
 
