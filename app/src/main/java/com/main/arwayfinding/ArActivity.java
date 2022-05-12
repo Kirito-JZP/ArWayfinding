@@ -35,6 +35,7 @@ import com.google.ar.sceneform.ArSceneView;
 import com.google.ar.sceneform.Node;
 import com.google.ar.sceneform.math.Quaternion;
 import com.google.ar.sceneform.math.Vector3;
+import com.google.ar.sceneform.rendering.Color;
 import com.google.ar.sceneform.rendering.ModelRenderable;
 import com.google.ar.sceneform.rendering.Renderable;
 import com.google.ar.sceneform.rendering.ViewRenderable;
@@ -164,13 +165,13 @@ public class ArActivity extends AppCompatActivity implements SensorEventListener
                                         trackerLogic.requestLastLocation(new TrackerLogic.RequestLocationCompleteCallback() {
                                             @Override
                                             public void onRequestLocationComplete(Location location) {
-                                                if(destinationStr!=null){
+                                                if (destinationStr != null) {
                                                     destination = PlaceUtils.autocompletePlaces(destinationStr, new LatLng(location.getLatitude(), location.getLongitude())).get(0);
                                                     LatLng latlng = queryLatLng(destination.getGmPlaceID());
                                                     destination.setLatitude(latlng.latitude);
                                                     destination.setLongitude(latlng.longitude);
                                                 }
-                                                renderAR_nearBy(location);
+                                                renderAR(location);
                                             }
                                         });
                                     }
@@ -193,19 +194,22 @@ public class ArActivity extends AppCompatActivity implements SensorEventListener
                                     // Create the arrow node and add it to the anchor.
                                     Node arrow = new Node();
                                     arrow.setLocalPosition((new Vector3(0.0f, 0.0f, -1.0f)));
+                                    arrow.setLocalScale(new Vector3(0.5f, 0.5f, 0.5f));
                                     arSceneView.getScene().getCamera().addChild(arrow);
                                     //arrow.setParent(anchorNode);
+                                    arrowRenderable.getMaterial().setFloat3("baseColorTint",
+                                            new Color(android.graphics.Color.rgb(255, 0, 0)));
                                     arrow.setRenderable(arrowRenderable);
                                     placed = true; //to place the arrow just once.
                                 } else {
                                     Node arrow = arSceneView.getScene().getCamera().getChildren().get(0);
-//                                    if (Math.round(Math.toDegrees(orientationAngles[1]) / 15) * 15 % 90 != 0) {
-//                                        arrow.setLocalRotation(Quaternion.eulerAngles(new Vector3(
-//                                                Math.round(Math.toDegrees(orientationAngles[1]) / 20) * 20,
-//                                                Math.round(Math.toDegrees(orientationAngles[2]) / 20) * 20,
-//                                                Math.round(Math.toDegrees(orientationAngles[0]) / 20) * 20)));
-//                                    }
-                                    arrow.setLocalRotation(Quaternion.eulerAngles(new Vector3(rotateDegree[1], 0.0F, -rotateDegree[2])));
+                                    if (Math.round(Math.toDegrees(orientationAngles[1]) / 15) * 15 % 90 != 0) {
+                                        arrow.setLocalRotation(Quaternion.eulerAngles(new Vector3(
+                                                Math.round(Math.toDegrees(orientationAngles[1]) / 20) * 20,
+                                                Math.round(Math.toDegrees(orientationAngles[2]) / 20) * 20,
+                                                Math.round(Math.toDegrees(orientationAngles[0]) / 20) * 20)));
+                                    }
+//                                    arrow.setLocalRotation(Quaternion.eulerAngles(new Vector3(rotateDegree[1], 0.0F, -rotateDegree[2])));
                                 }
                             }
 
@@ -388,14 +392,14 @@ public class ArActivity extends AppCompatActivity implements SensorEventListener
 
     @Override
     public void onSensorChanged(SensorEvent sensorEvent) {
-        if(sensorEvent.sensor.getType()==Sensor.TYPE_ORIENTATION){
+        if (sensorEvent.sensor.getType() == Sensor.TYPE_ORIENTATION) {
             System.out.println("方位角：" + (float) (Math.round(sensorEvent.values[0] * 100)) / 100);
             System.out.println("倾斜角：" + (float) (Math.round(sensorEvent.values[1] * 100)) / 100);
             System.out.println("滚动角：" + (float) (Math.round(sensorEvent.values[2] * 100)) / 100);
             rotateDegree[0] = (float) (Math.round(sensorEvent.values[0] * 100)) / 100;
             rotateDegree[1] = (float) (Math.round(sensorEvent.values[1] * 100)) / 100;
             rotateDegree[2] = (float) (Math.round(sensorEvent.values[2] * 100)) / 100;
-        }else{
+        } else {
             if (sensorEvent.sensor.getType() == Sensor.TYPE_ACCELEROMETER) {
                 System.arraycopy(sensorEvent.values, 0, accelerometerReading,
                         0, accelerometerReading.length);
@@ -510,7 +514,7 @@ public class ArActivity extends AppCompatActivity implements SensorEventListener
                             Vector3 worldPosition = nodeObject.getWorldPosition();
                             worldPosition.y = -5;
                             nodeObject.setWorldPosition(worldPosition);
-                            nodeObject.setLocalScale(new Vector3(0.8f, 0.8f, 0.8f));
+                            nodeObject.setLocalScale(new Vector3(0.99f, 0.99f, 0.99f));
                         }
                     });
                     // Adding a simple location marker of a 3D model

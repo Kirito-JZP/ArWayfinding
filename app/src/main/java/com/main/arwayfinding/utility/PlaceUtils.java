@@ -201,9 +201,7 @@ public class PlaceUtils {
         try {
             NearbySearchRequest nearbySearchRequest = PlacesApi.nearbySearchQuery(ArWayfindingApp.getGeoApiContext(),
                     new com.google.maps.model.LatLng(location.getLatitude(), location.getLongitude()));
-            nearbySearchRequest.radius(50);
-            System.out.println("=======================");
-            System.out.println(ArWayfindingApp.getGeoApiContext());
+            nearbySearchRequest.radius(30);
             PlacesSearchResponse placesSearchResponse = nearbySearchRequest.await();
             PlacesSearchResult[] results = placesSearchResponse.results;
             for (int i = 1; i < results.length; i++) {
@@ -219,7 +217,7 @@ public class PlaceUtils {
         } catch (ApiException | InterruptedException | IOException e) {
             e.printStackTrace();
         }
-
+        System.out.println(rtn);
         return rtn;
     }
 
