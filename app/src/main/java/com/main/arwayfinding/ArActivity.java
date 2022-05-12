@@ -86,6 +86,7 @@ public class ArActivity extends AppCompatActivity implements SensorEventListener
     private ArrayList<LatLng> waypoints;
     //address from map search
     private String destinationStr;
+    private LocationDto destination;
     private ImageView arReturnBtn;
     private static boolean placed = false;
     private Location lastPosition;
@@ -112,7 +113,6 @@ public class ArActivity extends AppCompatActivity implements SensorEventListener
         Intent intentNavi = this.getIntent();
         destinationStr = intentNavi.getStringExtra("targetLoc");
         waypoints = intentNavi.getParcelableArrayListExtra("waypoints");
-
 
         CompletableFuture<ViewRenderable> layout = ViewRenderable.builder().setView(this, R.layout.activity_ar_label).build();
 
@@ -163,6 +163,10 @@ public class ArActivity extends AppCompatActivity implements SensorEventListener
                                         trackerLogic.requestLastLocation(new TrackerLogic.RequestLocationCompleteCallback() {
                                             @Override
                                             public void onRequestLocationComplete(Location location) {
+                                                destination = PlaceUtils.autocompletePlaces(destinationStr, new LatLng(location.getLatitude(), location.getLongitude())).get(0);
+                                                LatLng latlng = queryLatLng(destination.getGmPlaceID());
+                                                destination.setLatitude(latlng.latitude);
+                                                destination.setLongitude(latlng.longitude);
                                                 renderAR(location);
                                             }
                                         });
@@ -410,17 +414,16 @@ public class ArActivity extends AppCompatActivity implements SensorEventListener
         for (int i = 0; i < waypoints.size(); i++) {
             float[] result = new float[3];
             Location.distanceBetween(waypoints.get(i).latitude, waypoints.get(i).longitude, location.getLatitude(), location.getLongitude(), result);
-            if (result[0] <= 5) {
+            if (result[0] <= 10) {
                 if (i > 0) {
                     waypoints.subList(0, i).clear();
+                    lastPosition = location;
+                    locationScene.clearMarkers();
+                    updateRequired = true;
                 }
                 break;
             }
         }
-        LocationDto destination = PlaceUtils.autocompletePlaces(destinationStr, new LatLng(location.getLatitude(), location.getLongitude())).get(0);
-        LatLng latlng = queryLatLng(destination.getGmPlaceID());
-        destination.setLatitude(latlng.latitude);
-        destination.setLongitude(latlng.longitude);
 
         if (lastPosition == null) {
             lastPosition = location;
@@ -454,7 +457,12 @@ public class ArActivity extends AppCompatActivity implements SensorEventListener
             // Adding the marker
             locationScene.mLocationMarkers.add(viewLocationMarker);
             // draw routine -----------
+            int count = 0;
             for (LatLng waypoint : waypoints) {
+                count++;
+                if(count>=6){
+                    break;
+                }
                 CompletableFuture<ViewRenderable> layout = ViewRenderable.builder().setView(this, R.layout.activity_ar_label).build();
                 CompletableFuture<ModelRenderable> model = ModelRenderable.builder().setSource(this, R.raw.ball).build();
                 CompletableFuture.allOf(layout, model).handle((notUsed, throwable) -> {
